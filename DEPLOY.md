@@ -37,8 +37,11 @@ EOF
 chmod 600 /opt/5archive/.env
 ```
 
-The daemon auth token is the secret in the 5chan daemon's RPC URL on this host
-(check the bitsocial-cli daemon's config/service on the VPS).
+The daemon auth token is the secret in the 5chan daemon's RPC URL on this host.
+In practice the easiest place to read it is the co-located board manager's
+compose file: `/opt/5chan-board-manager/docker-compose.yml` sets
+`PKC_RPC_WS_URL=ws://host.docker.internal:9138/<token>` — use the same token
+with `ws://localhost:9138/…` (5archive runs with host networking).
 
 Build and start:
 
@@ -64,20 +67,23 @@ Notes:
 
 ## 2. Caddy vhost (on the same VPS)
 
-The host already runs Caddy for other sites — add one vhost to its Caddyfile:
+The host runs Caddy as the systemd `caddy` service with `/etc/caddy/Caddyfile`.
+Back it up, add one vhost (matching the style of the existing site blocks),
+validate, then reload:
 
 ```caddy
+# 5archive — 5chan archiver API/crawler (-> 127.0.0.1:4000)
 api.5archive.org {
+	encode zstd gzip
 	reverse_proxy 127.0.0.1:4000
 }
 ```
 
-Reload Caddy (whichever way it runs on this host):
-
 ```bash
-systemctl reload caddy
-# or, if Caddy runs as a container:
-docker exec <caddy-container> caddy reload --config /etc/caddy/Caddyfile
+cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak-5archive
+# …edit…
+caddy validate --config /etc/caddy/Caddyfile
+systemctl reload caddy    # reload, never restart — other sites run here
 ```
 
 Caddy fetches the TLS cert automatically once the DNS record below exists
@@ -96,10 +102,13 @@ Caddy fetches the TLS cert automatically once the DNS record below exists
 The web UI is the engine's `webui/` directory, deployed as-is — no fork. Deploy
 from a checkout of the public engine repo with the Vercel CLI:
 
+The live project is `toms-projects-2188af94/5archive` (tomcasaburi's Vercel
+account — no Vercel app on the GitHub orgs).
+
 ```bash
 git clone https://github.com/bitsocialnet/bitsocial-indexer.git
 cd bitsocial-indexer/webui
-vercel link          # create/select the "5archive" project (root = this dir)
+vercel link --yes --project 5archive    # root = this dir
 ```
 
 Set the environment variables (production). These are the **actual names the
@@ -110,31 +119,28 @@ webui reads** (`webui/lib/api.ts`, `webui/lib/site.ts`):
 | `INDEXER_API` | `https://api.5archive.org` | API base URL (SSR fetches) |
 | `SITE_NAME` | `5archive` | Site name in header/titles |
 | `SITE_BADGE` | *(empty string)* | No badge — title is just "5archive" |
+| `SITE_URL` | `https://5archive.org` | Canonicals, OpenGraph, robots, sitemaps |
+| `THEME` | `5chan` | Classic imageboard (yotsuba) skin |
+| `BRAND_TEXT` | `A Bitsocial Forge product` | Footer attribution line |
+| `BRAND_URL` | `https://bitsocialforge.com` | Footer attribution link |
 
 ```bash
-vercel env add INDEXER_API production   # https://api.5archive.org
-vercel env add SITE_NAME production     # 5archive
-vercel env add SITE_BADGE production    # (empty)
+printf '%s' "https://api.5archive.org" | vercel env add INDEXER_API production
+# …same pattern for the rest; for the empty SITE_BADGE use:
+echo '' | vercel env add SITE_BADGE production
 ```
-
-> The current webui has **no** `THEME`, `BRAND_TEXT`, `BRAND_URL`, or
-> `SITE_URL` env vars — don't set them; Vercel would just ignore them. Once the
-> engine grows theme/brand-line support, add: `THEME=5chan`,
-> `BRAND_TEXT="A Bitsocial Forge product"`,
-> `BRAND_URL=https://bitsocialforge.com`. (`SITE_URL` is a server-side var,
-> already set on the VPS.)
 
 Deploy and attach the domains:
 
 ```bash
-vercel deploy --prod
+vercel deploy --prod --yes
 vercel domains add 5archive.org
-vercel domains add www.5archive.org     # redirects to apex by default
+vercel domains add www.5archive.org
 ```
 
 Verify: `https://5archive.org` renders board list and search results (SSR —
-view-source should contain post content), and browser calls to
-`https://api.5archive.org` pass CORS.
+view-source should contain post content), `/robots.txt` and `/sitemap.xml`
+respond, and browser calls to `https://api.5archive.org` pass CORS.
 
 ## 5. Updates
 

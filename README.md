@@ -57,6 +57,7 @@ Two deployments, one engine:
 |------|---------|
 | `docker-compose.yml` | Builds the engine's `server` from GitHub, 5archive config via env |
 | `config/communities.json` | The 5chan boards to index (generated, don't hand-edit) |
+| `config/blocklist.json` | Takedown blocklist — CIDs redacted from the archive (see below) |
 | `scripts/build-communities.mjs` | Regenerates the board list from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
 | `.env.example` | Documents every env var; real `.env` lives only on the VPS |
 | `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
@@ -83,6 +84,54 @@ docker compose up -d --build
 - **Update the engine:** `docker compose build --no-cache && docker compose up -d`
   (rebuilds from the latest `bitsocial-indexer` master). For the web UI,
   redeploy on Vercel.
+
+## Takedowns / content policy
+
+5archive is a mirror of already-moderated content, plus an operator-level
+takedown mechanism on top:
+
+- **Only moderated boards are indexed.** 5archive crawls the 5chan directory
+  boards listed in `config/communities.json` — communities that are actively
+  moderated upstream.
+- **Mod-queue content is never indexed.** Posts pending approval
+  (`pendingApproval`) on a board never enter the archive; only content the
+  board's moderators have let through gets crawled.
+- **Upstream removals are inherited.** When 5chan moderators remove a comment
+  or thread, the archive tombstones it on the next crawl rather than keeping
+  the removed content readable.
+- **Takedown requests are honored via the blocklist.** Content that must be
+  removed from the archive itself (legal takedowns, abuse reports) is redacted
+  by adding its CID to `config/blocklist.json`. The takedown contact and
+  instructions are published on the site's `/legal` page (rendered from the
+  webui's `CONTACT_EMAIL` env, linked in the footer).
+
+### Blocklist format
+
+`config/blocklist.json` must stay a **valid JSON array** (no comments). Each
+entry is either a bare CID string or an object:
+
+```json
+[
+  "QmExampleBareCid…",
+  { "cid": "QmExampleCid…", "scope": "comment", "reason": "DMCA 2026-07-06" },
+  { "cid": "QmExampleCid…", "scope": "thread", "reason": "court order" }
+]
+```
+
+- `scope`: `"comment"` (just that post) or `"thread"` (the whole thread under
+  it). A bare string means comment scope.
+- `reason`: free-form operator note (kept private in this repo — it is not
+  served publicly).
+
+### Operator workflow
+
+1. Edit `config/blocklist.json` in this repo (keep it valid JSON) and commit.
+2. Copy it to the VPS per [DEPLOY.md](DEPLOY.md):
+   `scp config/blocklist.json root@91.234.199.189:/opt/5archive/config/`
+3. Done — the engine watches the file and redacts (tombstones) the listed
+   content within about a minute. **No restart needed.**
+
+Removing an entry and re-copying the file restores the content the same way.
 
 ## TODO (later)
 

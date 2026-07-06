@@ -1,65 +1,97 @@
 # 5archive
 
-Closed-source 5chan archiver and search engine — the deployment behind
-**5archive.org**.
+The permanent public archive and search engine for [5chan](https://5chan.app)
+boards — **[5archive.org](https://5archive.org)**, a
+[Bitsocial Forge](https://bitsocialforge.com) product.
 
-It is a thin, private wrapper around the open
-[`bitsocial-indexer`](https://github.com/bitsocialnet/bitsocial-indexer) engine,
-configured to index **only 5chan communities** and branded as 5archive. It
-crawls 5chan boards from a [`bitsocial-cli`](https://github.com/bitsocialnet/bitsocial-cli)
-daemon into SQLite and serves search + browse over a REST API and web UI.
+5chan purges archived threads 48 hours after archival. 5archive crawls every
+5chan board continuously, so threads that vanish upstream stay readable — and
+searchable — here forever. Server-rendered pages give 5chan content what the
+network itself can't: SEO and permanence.
 
 5chan embeds this instance's API to power in-app search (a `/search/` board).
 
-> **Why closed source?** The engine is GPL-3.0 (copyleft on *distribution*, not
-> on running a service), so this monetised, ad-supported instance can stay
-> private — the same model as Etherscan on open Ethereum. This repo holds only
-> config, the community list, and (later) theme + ads; no engine code is forked.
+This is a **thin, private deployment repo**: config, the board list, and deploy
+docs. The actual software is the open
+[`bitsocial-indexer`](https://github.com/bitsocialnet/bitsocial-indexer) engine
+(GPL-3.0-or-later), built and deployed directly from its public repo — no
+engine code is forked or vendored here.
 
-## How it works
+> **Why is this repo closed source?** The engine's GPL is copyleft on
+> *distribution*, not on running a service, so a branded private instance is
+> fine — the same model as Etherscan on open Ethereum. This repo stays private
+> because it's deployment config, not software. v1 runs **no ads**; ads may be
+> considered later.
+
+## Architecture
+
+Two deployments, one engine:
 
 ```
-5chan bitsocial-cli daemon (PKC RPC :9138)
-        │
-   bitsocial-indexer engine  ← built from github.com/bitsocialnet/bitsocial-indexer
-   (server + webui, via docker-compose git context)
-        │  COMMUNITIES_SOURCE = config/communities.json (5chan boards only)
-   Caddy → 5archive.org   +   5chan /search/ board hits /api
+        Bitsocial network (IPFS / IPNS / pubsub)
+                     │
+     5chan bitsocial-cli daemon (PKC RPC, ws://localhost:9138)
+                     │
+ ┌───────────────────────────────────────────┐
+ │ VPS 91.234.199.189 — this repo            │
+ │   bitsocial-indexer `server` (Docker)     │
+ │   crawler ─▶ SQLite+FTS5 ─▶ Fastify API   │
+ │   Caddy ─▶ https://api.5archive.org       │
+ └───────────────────┬───────────────────────┘
+                     │  REST + search API (CORS-restricted)
+ ┌───────────────────┴───────────────────────┐
+ │ Vercel — engine's `webui/` (Next.js SSR)  │
+ │   https://5archive.org                    │
+ └───────────────────────────────────────────┘
+   + 5chan's in-app /search/ board calls the API directly
 ```
 
-Nothing here forks the engine — `docker-compose.yml` builds it directly from the
-public repo and overrides config via environment.
+- **API + crawler** run on the same VPS as the 5chan daemon they crawl, so the
+  PKC RPC secret never leaves the host.
+- **Web UI** is the engine's `webui/` deployed to Vercel, pointed at the API
+  via `INDEXER_API`.
+
+## What's in this repo
+
+| Path | Purpose |
+|------|---------|
+| `docker-compose.yml` | Builds the engine's `server` from GitHub, 5archive config via env |
+| `config/communities.json` | The 5chan boards to index (generated, don't hand-edit) |
+| `scripts/build-communities.mjs` | Regenerates the board list from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
+| `.env.example` | Documents every env var; real `.env` lives only on the VPS |
+| `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
 
 ## Setup
 
+See **[DEPLOY.md](DEPLOY.md)** for the complete runbook. The short version:
+
 ```bash
-# 1. Generate the 5chan community list from bitsocialnet/lists
-node scripts/build-communities.mjs          # writes config/communities.json
+# Generate the 5chan board list
+node scripts/build-communities.mjs      # writes config/communities.json
 
-# 2. Configure
-cp .env.example .env                         # set PKC_RPC_URL (daemon + auth token)
-
-# 3. Run (on the same host as the 5chan daemon)
+# VPS (api.5archive.org): scp this repo to /opt/5archive, create .env, then
 docker compose up -d --build
-```
 
-Then point Caddy at `127.0.0.1:3000` (web UI) and proxy `/api` → `127.0.0.1:4000`
-for `5archive.org`.
+# Web UI (5archive.org): deploy the engine's webui/ to Vercel
+```
 
 ## Maintenance
 
 - **Refresh the board list** when 5chan directories change:
-  `node scripts/build-communities.mjs` then `docker compose restart server`.
+  `node scripts/build-communities.mjs`, scp `config/` to the VPS, then
+  `docker compose restart server`.
 - **Update the engine:** `docker compose build --no-cache && docker compose up -d`
-  (rebuilds from the latest `bitsocial-indexer` main).
+  (rebuilds from the latest `bitsocial-indexer` master). For the web UI,
+  redeploy on Vercel.
 
 ## TODO (later)
 
-- 5chan imageboard skin (the engine ships the neutral bitsocial.net look; only
-  `SITE_NAME` is overridden so far). Re-skin via the engine's theme tokens or a
-  dedicated frontend on the API.
-- Ad slots.
+- 5chan imageboard skin — the engine's webui currently exposes only
+  `SITE_NAME`/`SITE_BADGE`; theme + brand-line vars are pending upstream.
+- Maybe ads (explicitly out of scope for v1).
 
 ## License
 
 Proprietary / all rights reserved. Not for redistribution.
+(The engine itself is GPL-3.0-or-later at
+[bitsocialnet/bitsocial-indexer](https://github.com/bitsocialnet/bitsocial-indexer).)

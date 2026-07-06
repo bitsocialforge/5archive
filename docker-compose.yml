@@ -1,14 +1,23 @@
-# 5archive — closed-source 5chan archiver.
+# 5archive — 5chan archiver API + crawler (a Bitsocial Forge product).
 #
-# Runs the public `bitsocial-indexer` engine (built straight from GitHub),
-# configured to index only 5chan communities and branded as 5archive. Bind to
-# localhost; a reverse proxy (Caddy) terminates TLS for 5archive.org and proxies
-# the web UI plus /api → the indexer.
+# Runs only the `server` half of the public `bitsocial-indexer` engine, built
+# straight from GitHub — no engine code lives in this repo. The web UI is a
+# separate Vercel deployment of the engine's `webui/` (see DEPLOY.md).
+#
+# Networking: the container shares the host's network so the crawler can reach
+# the 5chan bitsocial-cli daemon on ws://localhost:9138 (the daemon binds to
+# host loopback). HOST=127.0.0.1 keeps the API itself loopback-only — the
+# host's Caddy terminates TLS for api.5archive.org and proxies to :4000.
 services:
   server:
     build:
-      context: https://github.com/bitsocialnet/bitsocial-indexer.git#main:server
+      # The engine's default branch is `master` (it has no `main`).
+      context: https://github.com/bitsocialnet/bitsocial-indexer.git#master:server
+    network_mode: host
     environment:
+      # Bind: loopback only; Caddy is the public face.
+      HOST: 127.0.0.1
+      PORT: 4000
       SITE_NAME: 5archive
       SITE_URL: ${SITE_URL:-https://5archive.org}
       # The 5chan bitsocial-cli daemon (PKC RPC). Secret — set in .env, never commit.
@@ -18,23 +27,14 @@ services:
       DB_PATH: /data/5archive.db
       CRAWL_INTERVAL_MS: ${CRAWL_INTERVAL_MS:-300000}
       CRAWL_MAX_PAGES: ${CRAWL_MAX_PAGES:-20}
+      # CORS: only the Vercel-hosted web UI may call the API from a browser.
+      # ALLOWED_ORIGINS is the engine's new env name; CORS_ORIGIN is the one the
+      # current tip reads — set both so this works across engine versions.
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://5archive.org}
+      CORS_ORIGIN: ${ALLOWED_ORIGINS:-https://5archive.org}
     volumes:
       - ./config:/config:ro
       - data:/data
-    ports:
-      - "127.0.0.1:4000:4000"
-    restart: unless-stopped
-
-  webui:
-    build:
-      context: https://github.com/bitsocialnet/bitsocial-indexer.git#main:webui
-    environment:
-      INDEXER_API: http://server:4000
-      SITE_NAME: 5archive
-      SITE_BADGE: ""   # just "5archive", no badge
-    ports:
-      - "127.0.0.1:3000:3000"
-    depends_on: [server]
     restart: unless-stopped
 
 volumes:

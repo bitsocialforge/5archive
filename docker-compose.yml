@@ -18,6 +18,11 @@ services:
       # Bind: loopback only; Caddy is the public face.
       HOST: 127.0.0.1
       PORT: 4000
+      # Cap the V8 heap (defaults let it balloon to ~4 GiB; box has OOM-killed
+      # before). If the server crash-loops or pegs CPU in GC as the archive
+      # grows, raise to 1536 first — 1024 was sized to ~66 communities.
+      # Details: /root/INFRA-NOTES.md.
+      NODE_OPTIONS: "--max-old-space-size=1024"
       SITE_NAME: 5archive
       SITE_URL: ${SITE_URL:-https://5archive.org}
       # The 5chan bitsocial-cli daemon (PKC RPC). Secret — set in .env, never commit.
@@ -39,6 +44,8 @@ services:
       - ./config:/config:ro
       - data:/data
     restart: unless-stopped
+    # Hard backstop above the heap cap (native/buffer memory included).
+    mem_limit: 2g
 
 volumes:
   data:

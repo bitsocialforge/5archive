@@ -11,21 +11,22 @@ network itself can't: SEO and permanence.
 
 5chan embeds this instance's API to power in-app search (a `/search/` board).
 
-This is a **thin, private deployment repo**: config, the board list, and deploy
-docs. The actual software is the open
+This is the **private repo for the full 5archive app**: the frontend
+(`webui/`, a vendored fork of the engine's web UI) plus deploy config, the
+board list, and deploy docs. The API/crawler is the open
 [`bitsocial-indexer`](https://github.com/bitsocialnet/bitsocial-indexer) engine
-(GPL-3.0-or-later), built and deployed directly from its public repo — no
-engine code is forked or vendored here.
+(GPL-3.0-or-later) — that part is **not** forked; Docker builds it directly
+from the public repo.
 
 > **Why is this repo closed source?** The engine's GPL is copyleft on
 > *distribution*, not on running a service, so a branded private instance is
-> fine — the same model as Etherscan on open Ethereum. This repo stays private
-> because it's deployment config, not software. v1 runs **no ads**; ads may be
-> considered later.
+> fine — the same model as Etherscan on open Ethereum. The vendored `webui/`
+> is a private GPL fork that is never distributed, which the GPL permits.
+> v1 runs **no ads**; ads may be considered later.
 
 ## Architecture
 
-Two deployments, one engine:
+Two deployments:
 
 ```
         Bitsocial network (IPFS / IPNS / pubsub)
@@ -40,7 +41,8 @@ Two deployments, one engine:
  └───────────────────┬───────────────────────┘
                      │  REST + search API (CORS-restricted)
  ┌───────────────────┴───────────────────────┐
- │ Vercel — engine's `webui/` (Next.js SSR)  │
+ │ Vercel — this repo's `webui/` (Next.js    │
+ │   SSR, vendored fork of the engine webui) │
  │   https://5archive.org                    │
  └───────────────────────────────────────────┘
    + 5chan's in-app /search/ board calls the API directly
@@ -48,13 +50,16 @@ Two deployments, one engine:
 
 - **API + crawler** run on the same VPS as the 5chan daemon they crawl, so the
   PKC RPC secret never leaves the host.
-- **Web UI** is the engine's `webui/` deployed to Vercel, pointed at the API
-  via `INDEXER_API`.
+- **Web UI** is this repo's `webui/` — a vendored fork of the engine's webui
+  (taken at v0.2.0; upstream improvements ported manually) — deployed to
+  Vercel and pointed at the API via `INDEXER_API`. 5archive-specific UI work
+  happens here, not upstream.
 
 ## What's in this repo
 
 | Path | Purpose |
 |------|---------|
+| `webui/` | The 5archive frontend — vendored fork of the engine's `webui/` (see `webui/README.md` for provenance) |
 | `docker-compose.yml` | Builds the engine's `server` from GitHub, 5archive config via env |
 | `config/communities.json` | The 5chan boards to index (generated, don't hand-edit) |
 | `config/blocklist.json` | Takedown blocklist — CIDs redacted from the archive (see below) |
@@ -73,7 +78,8 @@ node scripts/build-communities.mjs      # writes config/communities.json
 # VPS (api.5archive.org): scp this repo to /opt/5archive, create .env, then
 docker compose up -d --build
 
-# Web UI (5archive.org): deploy the engine's webui/ to Vercel
+# Web UI (5archive.org): deploy this repo's webui/ to Vercel
+cd webui && vercel deploy --prod --yes
 ```
 
 ## Maintenance
@@ -81,9 +87,11 @@ docker compose up -d --build
 - **Refresh the board list** when 5chan directories change:
   `node scripts/build-communities.mjs`, scp `config/` to the VPS, then
   `docker compose restart server`.
-- **Update the engine:** `docker compose build --no-cache && docker compose up -d`
-  (rebuilds from the latest `bitsocial-indexer` master). For the web UI,
-  redeploy on Vercel.
+- **Update the engine (API/crawler):** `docker compose build --no-cache &&
+  docker compose up -d` (rebuilds from the latest `bitsocial-indexer` master).
+- **Update the web UI:** edit `webui/` in this repo, then
+  `vercel deploy --prod` from `webui/`. Upstream engine-webui improvements are
+  ported into `webui/` manually.
 
 ## Takedowns / content policy
 
@@ -135,12 +143,14 @@ Removing an entry and re-copying the file restores the content the same way.
 
 ## TODO (later)
 
-- 5chan imageboard skin — the engine's webui currently exposes only
-  `SITE_NAME`/`SITE_BADGE`; theme + brand-line vars are pending upstream.
+- 5chan imageboard skin — now that the webui is forked into this repo,
+  5archive-specific theming can be built directly in `webui/`.
 - Maybe ads (explicitly out of scope for v1).
 
 ## License
 
-Proprietary / all rights reserved. Not for redistribution.
-(The engine itself is GPL-3.0-or-later at
-[bitsocialnet/bitsocial-indexer](https://github.com/bitsocialnet/bitsocial-indexer).)
+Proprietary / all rights reserved. Not for redistribution. Exception:
+`webui/` is a private fork of GPL-3.0-or-later code and remains under that
+license (it is simply not distributed). The engine itself is GPL-3.0-or-later
+at
+[bitsocialnet/bitsocial-indexer](https://github.com/bitsocialnet/bitsocial-indexer).

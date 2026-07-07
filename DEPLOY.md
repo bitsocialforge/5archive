@@ -99,16 +99,17 @@ Caddy fetches the TLS cert automatically once the DNS record below exists
 
 ## 4. Vercel — web UI (5archive.org)
 
-The web UI is the engine's `webui/` directory, deployed as-is — no fork. Deploy
-from a checkout of the public engine repo with the Vercel CLI:
+The web UI is **this repo's `webui/`** — a vendored fork of the engine's
+webui (see `webui/README.md` for provenance). Deploy it with the Vercel CLI;
+no cloning the engine repo.
 
 The live project is `toms-projects-2188af94/5archive` (tomcasaburi's Vercel
 account — no Vercel app on the GitHub orgs).
 
 ```bash
-git clone https://github.com/bitsocialnet/bitsocial-indexer.git
-cd bitsocial-indexer/webui
+cd webui
 vercel link --yes --project 5archive    # root = this dir
+vercel deploy --prod --yes
 ```
 
 Set the environment variables (production). These are the **actual names the
@@ -123,7 +124,7 @@ webui reads** (`webui/lib/api.ts`, `webui/lib/site.ts`):
 | `THEME` | `5chan` | Classic imageboard (yotsuba) skin |
 | `BRAND_TEXT` | `A Bitsocial Forge product` | Footer attribution line |
 | `BRAND_URL` | `https://bitsocialforge.com` | Footer attribution link |
-| `CONTACT_EMAIL` | `tom@bitsocial.net` | Takedown/abuse contact on the `/legal` page (content policy + takedown instructions, linked from the footer). Switch to a dedicated `abuse@5archive.org` forward once it exists. |
+| `CONTACT_EMAIL` | `abuse@5archive.org` | Takedown/abuse contact on the `/legal` page (content policy + takedown instructions, linked from the footer). |
 
 ```bash
 printf '%s' "https://api.5archive.org" | vercel env add INDEXER_API production
@@ -150,5 +151,5 @@ respond, and browser calls to `https://api.5archive.org` pass CORS.
 | Board list (5chan directories) | `node scripts/build-communities.mjs`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'` |
 | Takedown blocklist | Edit `config/blocklist.json` (see README), then `scp config/blocklist.json root@91.234.199.189:/opt/5archive/config/` — the engine watches the file and applies it within ~a minute, **no restart** |
 | Engine (server) | On the VPS: `cd /opt/5archive && docker compose build --no-cache && docker compose up -d` |
-| Engine (webui) | `git pull` in the engine checkout, `vercel deploy --prod` from `webui/` |
+| Web UI | Edit `webui/` in this repo, then `vercel deploy --prod` from `webui/`. Engine-webui upstream improvements are ported into `webui/` manually — there is no automatic sync. |
 | This repo's compose/env conventions | `scp docker-compose.yml` to `/opt/5archive/` and `docker compose up -d` |

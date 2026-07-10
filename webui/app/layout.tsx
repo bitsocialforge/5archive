@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
 import { Exo, Manrope } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css';
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <BrandHeader />
         <main className="container">{children}</main>
         <SiteFooter />
+        <Analytics />
       </body>
     </html>
   );

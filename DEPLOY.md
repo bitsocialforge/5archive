@@ -104,7 +104,9 @@ webui (see `webui/README.md` for provenance). Deploy it with the Vercel CLI;
 no cloning the engine repo.
 
 The live project is `toms-projects-2188af94/5archive` (tomcasaburi's Vercel
-account — no Vercel app on the GitHub orgs).
+account). It is connected to `bitsocialforge/5archive`, with `webui/` as the
+project root and `master` as the production branch. Pushing `master` triggers a
+production deployment. The CLI remains available for manual fallback deploys.
 
 ```bash
 cd webui
@@ -151,5 +153,5 @@ respond, and browser calls to `https://api.5archive.org` pass CORS.
 | Board list (5chan directories) | `node scripts/build-communities.mjs`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'` |
 | Takedown blocklist | Edit `config/blocklist.json` (see README), then `scp config/blocklist.json root@91.234.199.189:/opt/5archive/config/` — the engine watches the file and applies it within ~a minute, **no restart** |
 | Engine (server) | On the VPS: `cd /opt/5archive && docker compose build --no-cache && docker compose up -d` |
-| Web UI | Edit `webui/` in this repo, then `vercel deploy --prod` from `webui/`. Engine-webui upstream improvements are ported into `webui/` manually — there is no automatic sync. |
+| Web UI | Edit `webui/` in this repo and push `master` for the normal Git-triggered production deployment. For a manual fallback, run `vercel deploy --prod` from `webui/`. Engine-webui upstream improvements are ported into `webui/` manually — there is no automatic sync. |
 | This repo's compose/env conventions | `scp docker-compose.yml` to `/opt/5archive/` and `docker compose up -d` |

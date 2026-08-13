@@ -22,13 +22,12 @@ scp docker-compose.yml root@91.234.199.189:/opt/5archive/
 scp -r config root@91.234.199.189:/opt/5archive/
 ```
 
-Create the env file **on the VPS** (the daemon auth token already lives there —
-don't copy it through your machine):
+Create the env file **on the VPS**:
 
 ```bash
 ssh root@91.234.199.189
 cat > /opt/5archive/.env <<'EOF'
-PKC_RPC_URL=ws://localhost:9138/REPLACE_WITH_DAEMON_AUTH_TOKEN
+PKC_RPC_URL=ws://localhost:9138
 SITE_URL=https://5archive.org
 ALLOWED_ORIGINS=https://5archive.org
 CRAWL_INTERVAL_MS=300000
@@ -37,11 +36,9 @@ EOF
 chmod 600 /opt/5archive/.env
 ```
 
-The daemon auth token is the secret in the 5chan daemon's RPC URL on this host.
-In practice the easiest place to read it is the co-located board manager's
-compose file: `/opt/5chan-board-manager/docker-compose.yml` sets
-`PKC_RPC_WS_URL=ws://host.docker.internal:9138/<token>` — use the same token
-with `ws://localhost:9138/…` (5archive runs with host networking).
+Because 5archive runs with host networking, `localhost` reaches the daemon as
+a local connection. Do **not** copy the daemon's remote auth key into this env
+file: it is unnecessary and dependency logs must never receive it.
 
 Build and start:
 

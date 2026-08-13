@@ -48,8 +48,8 @@ Two deployments:
    + 5chan's in-app /search/ board calls the API directly
 ```
 
-- **API + crawler** run on the same VPS as the 5chan daemon they crawl, so the
-  PKC RPC secret never leaves the host.
+- **API + crawler** run on the same VPS as the 5chan daemon and use its
+  local-only PKC RPC endpoint; the daemon's remote auth key is not stored here.
 - **Web UI** is this repo's `webui/` — a vendored fork of the engine's webui
   (taken at v0.2.0; upstream improvements ported manually) — deployed to
   Vercel and pointed at the API via `INDEXER_API`. 5archive-specific UI work

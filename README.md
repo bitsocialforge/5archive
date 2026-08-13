@@ -11,18 +11,24 @@ network itself can't: SEO and permanence.
 
 5chan embeds this instance's API to power in-app search (a `/search/` board).
 
-This is the **private repo for the full 5archive app**: the frontend
+This is the public source repository for the full 5archive app: the frontend
 (`webui/`, a vendored fork of the engine's web UI) plus deploy config, the
 board list, and deploy docs. The API/crawler is the open
 [`bitsocial-indexer`](https://github.com/bitsocialnet/bitsocial-indexer) engine
 (GPL-3.0-or-later) — that part is **not** forked; Docker builds it directly
 from the public repo.
 
-> **Why is this repo closed source?** The engine's GPL is copyleft on
-> *distribution*, not on running a service, so a branded private instance is
-> fine — the same model as Etherscan on open Ethereum. The vendored `webui/`
-> is a private GPL fork that is never distributed, which the GPL permits.
-> v1 runs **no ads**; ads may be considered later.
+## Open source, centralized service
+
+5archive is centralized in operation: Bitsocial Forge runs the crawler, index,
+API, and public website. Its source is open because the archive is
+infrastructure for the Bitsocial ecosystem, not a proprietary data moat. The
+GPL-licensed code and reproducible configuration make it easier to launch
+independent mirrors, forks, alternative frontends, and related side projects.
+
+That is the useful role of Bitsocial Forge here: run dependable centralized
+infrastructure where it helps, while publishing the implementation so others
+can reproduce and extend it. In the Forge's words: **accelerate Bitsocial**.
 
 ## Architecture
 
@@ -128,8 +134,8 @@ entry is either a bare CID string or an object:
 
 - `scope`: `"comment"` (just that post) or `"thread"` (the whole thread under
   it). A bare string means comment scope.
-- `reason`: free-form operator note (kept private in this repo — it is not
-  served publicly).
+- `reason`: free-form public operator note. This repository is public, so do
+  not include personal information or other sensitive material.
 
 ### Operator workflow
 
@@ -141,16 +147,16 @@ entry is either a bare CID string or an object:
 
 Removing an entry and re-copying the file restores the content the same way.
 
-## TODO (later)
+## Contributing and mirrors
 
-- 5chan imageboard skin — now that the webui is forked into this repo,
-  5archive-specific theming can be built directly in `webui/`.
-- Maybe ads (explicitly out of scope for v1).
+Forks, mirrors, alternate frontends, additional search tools, and portability
+improvements are welcome. The production instance remains operated by
+Bitsocial Forge, while independent deployments choose their own crawl scope,
+retention, moderation, takedown policy, infrastructure, and domain.
 
 ## License
 
-Proprietary / all rights reserved. Not for redistribution. Exception:
-`webui/` is a private fork of GPL-3.0-or-later code and remains under that
-license (it is simply not distributed). The engine itself is GPL-3.0-or-later
-at
+GPL-3.0-or-later. See [LICENSE](LICENSE).
+
+The separately built indexer engine is also GPL-3.0-or-later at
 [bitsocialnet/bitsocial-indexer](https://github.com/bitsocialnet/bitsocial-indexer).

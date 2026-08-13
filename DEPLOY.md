@@ -11,9 +11,9 @@ Prereqs: SSH access to `root@91.234.199.189`, Cloudflare access for the
 
 ## 1. VPS — API + crawler (api.5archive.org)
 
-The VPS has **no GitHub credentials for private repos**, so this repo is copied
-over with `scp`, not `git pull`. (The engine itself is public — Docker builds
-it straight from GitHub on the VPS.)
+The production checkout uses `scp` for its small operational surface; no
+GitHub credential is required. The indexer engine is built directly from its
+public GitHub repository by Docker.
 
 ```bash
 # From this repo on your machine:

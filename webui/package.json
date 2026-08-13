@@ -2,7 +2,7 @@
   "name": "@bitsocial/indexer-webui",
   "version": "0.0.1",
   "private": true,
-  "description": "Neutral Bitsocial-branded web UI for bitsocial-indexer",
+  "description": "Web UI for the 5archive public archive and search engine",
   "license": "GPL-3.0-or-later",
   "author": "Bitsocial Forge",
   "scripts": {

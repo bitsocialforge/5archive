@@ -30,7 +30,9 @@ cat > /opt/5archive/.env <<'EOF'
 PKC_RPC_URL=ws://localhost:9138
 SITE_URL=https://5archive.org
 ALLOWED_ORIGINS=https://5archive.org
-CRAWL_INTERVAL_MS=300000
+CRAWL_INTERVAL_MS=5000
+CRAWL_CONCURRENCY=8
+CRAWL_TIMEOUT_MS=30000
 CRAWL_MAX_PAGES=20
 EOF
 chmod 600 /opt/5archive/.env

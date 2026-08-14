@@ -10,7 +10,7 @@ import { excerpt, timeAgo } from '@/lib/format';
 import type { Comment, Thread } from '@/lib/types';
 
 // Threads are archived content: cache the page, revalidate for late replies.
-export const revalidate = 300;
+export const revalidate = 5;
 
 type Params = { params: Promise<{ dir: string; cid: string }> };
 

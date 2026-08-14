@@ -23,9 +23,9 @@ async function get<T>(path: string, revalidate?: number): Promise<T | null> {
 export const apiBase = BASE;
 
 export const getHealth = () => get<Health>('/api/health', 60);
-export const getCommunities = (revalidate = 300) => get<{ communities: Community[] }>('/api/communities', revalidate);
-export const getCommunity = (address: string) =>
-  get<Community>(`/api/communities/${encodeURIComponent(address)}`, 300);
-export const getPosts = (query = '', revalidate = 60) => get<PostPage>(`/api/posts${query}`, revalidate);
-export const getThread = (cid: string) => get<Thread>(`/api/posts/${encodeURIComponent(cid)}`, 300);
+export const getCommunities = (revalidate = 5) => get<{ communities: Community[] }>('/api/communities', revalidate);
+export const getCommunity = (address: string, revalidate = 5) =>
+  get<Community>(`/api/communities/${encodeURIComponent(address)}`, revalidate);
+export const getPosts = (query = '', revalidate = 5) => get<PostPage>(`/api/posts${query}`, revalidate);
+export const getThread = (cid: string, revalidate = 5) => get<Thread>(`/api/posts/${encodeURIComponent(cid)}`, revalidate);
 export const search = (q: string) => get<SearchResult>(`/api/search?q=${encodeURIComponent(q)}`);

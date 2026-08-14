@@ -68,10 +68,32 @@ Two deployments:
 | `webui/` | The 5archive frontend — vendored fork of the engine's `webui/` (see `webui/README.md` for provenance) |
 | `docker-compose.yml` | Builds the engine's `server` from GitHub, 5archive config via env |
 | `config/communities.json` | The 5chan boards to index (generated, don't hand-edit) |
+| `webui/lib/directories.json` | Directory code → boards + title, the web UI's URL map (generated, don't hand-edit) |
 | `config/blocklist.json` | Takedown blocklist — CIDs redacted from the archive (see below) |
-| `scripts/build-communities.mjs` | Regenerates the board list from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
+| `scripts/build-communities.mjs` | Regenerates both generated files from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
 | `.env.example` | Documents every env var; real `.env` lives only on the VPS |
 | `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
+
+## URL scheme
+
+5archive addresses content the way 5chan does — by **directory code**, not by
+board address:
+
+| URL | Page |
+|-----|------|
+| `5archive.org/biz` | Every archived thread under the `/biz/` directory |
+| `5archive.org/biz/thread/<cid>` | A thread; a reply's cid redirects to its thread, anchored (`#p<cid>`) |
+
+Several boards can compete for one directory code (the highest-scoring one
+resolves it on 5chan, and 5chan rotates to the next if it goes offline), so the
+directory page merges every candidate board's threads and a thread URL survives
+rotations. The code → boards map is `webui/lib/directories.json`, generated from
+[`bitsocialnet/lists`](https://github.com/bitsocialnet/lists).
+
+The pre-directory URLs (`/p/<address>`, `/c/<cid>`) permanently redirect to the
+new ones. A board that upstream drops from the directory lists while its threads
+stay archived is served under its address (`5archive.org/<address>`), so nothing
+indexed becomes unreachable.
 
 ## Local development
 
@@ -91,7 +113,7 @@ corepack yarn start       # https://5archive.localhost
 | `yarn start:preview` | Production build of `webui/`, served at the same URL |
 | `yarn build` | `next build` in `webui/` |
 | `yarn type-check` | `tsc --noEmit` in `webui/` |
-| `yarn communities:build` | Regenerates `config/communities.json` |
+| `yarn communities:build` | Regenerates `config/communities.json` + `webui/lib/directories.json` |
 
 The first portless run asks for sudo once to bind port 443 and trust its local
 CA. On a branch other than `master` the URL becomes
@@ -121,8 +143,8 @@ the project root; the root yarn project owns only the dev workflow and installs
 See **[DEPLOY.md](DEPLOY.md)** for the complete runbook. The short version:
 
 ```bash
-# Generate the 5chan board list
-node scripts/build-communities.mjs      # writes config/communities.json
+# Generate the 5chan board list and the directory-code URL map
+node scripts/build-communities.mjs      # config/communities.json + webui/lib/directories.json
 
 # VPS (api.5archive.org): scp this repo to /opt/5archive, create .env, then
 docker compose up -d --build
@@ -135,7 +157,9 @@ cd webui && vercel deploy --prod --yes
 
 - **Refresh the board list** when 5chan directories change:
   `node scripts/build-communities.mjs`, scp `config/` to the VPS, then
-  `docker compose restart server`.
+  `docker compose restart server`. The same run updates
+  `webui/lib/directories.json` — commit it and redeploy the web UI so new or
+  rotated directory codes resolve.
 - **Update the engine (API/crawler):** `docker compose build --no-cache &&
   docker compose up -d` (rebuilds from the latest `bitsocial-indexer` master).
 - **Update the web UI:** edit `webui/` in this repo, then

@@ -1,4 +1,5 @@
 import { getCommunities, getCommunity, getPosts } from '@/lib/api';
+import { boardPath, threadPath } from '@/lib/directories';
 import {
   absUrl,
   CORE_SITEMAP,
@@ -13,14 +14,11 @@ type Params = { params: Promise<{ community: string }> };
 
 const isoDate = (unixSec: number) => new Date(unixSec * 1000).toISOString();
 
-/** Static pages + one landing page per community. */
+/** Static pages + one landing page per board (deduped: boards can share a directory code). */
 async function coreUrls() {
   const communities = (await getCommunities(SITEMAP_TTL))?.communities ?? [];
-  return [
-    { loc: absUrl('/') },
-    { loc: absUrl('/search') },
-    ...communities.map((c) => ({ loc: absUrl(`/p/${encodeURIComponent(c.address)}`) })),
-  ];
+  const boards = [...new Set(communities.map((c) => boardPath(c.address)))];
+  return [{ loc: absUrl('/') }, { loc: absUrl('/search') }, ...boards.map((path) => ({ loc: absUrl(path) }))];
 }
 
 /**
@@ -40,7 +38,7 @@ async function communityUrls(address: string) {
     );
     if (!res || res.posts.length === 0) break;
     for (const p of res.posts) {
-      urls.push({ loc: absUrl(`/c/${encodeURIComponent(p.cid)}`), lastmod: isoDate(p.timestamp) });
+      urls.push({ loc: absUrl(threadPath(p)), lastmod: isoDate(p.timestamp) });
     }
     if (res.posts.length < SITEMAP_PAGE_LIMIT || urls.length >= MAX_URLS_PER_COMMUNITY) break;
   }

@@ -147,7 +147,7 @@ respond, and browser calls to `https://api.5archive.org` pass CORS.
 
 | What changed | Do |
 |--------------|----|
-| Board list (5chan directories) | `node scripts/build-communities.mjs`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'` |
+| Board list (5chan directories) | `node scripts/build-communities.mjs`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'`. The same run rewrites `webui/lib/directories.json` (the directory-code URL map) — commit it and redeploy the web UI |
 | Takedown blocklist | Edit `config/blocklist.json` (see README), then `scp config/blocklist.json root@91.234.199.189:/opt/5archive/config/` — the engine watches the file and applies it within ~a minute, **no restart** |
 | Engine (server) | On the VPS: `cd /opt/5archive && docker compose build --no-cache && docker compose up -d` |
 | Web UI | Edit `webui/` in this repo and push `master` for the normal Git-triggered production deployment. For a manual fallback, run `vercel deploy --prod` from `webui/`. Engine-webui upstream improvements are ported into `webui/` manually — there is no automatic sync. |

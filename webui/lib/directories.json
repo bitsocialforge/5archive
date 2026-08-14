@@ -1,0 +1,460 @@
+[
+  {
+    "code": "3",
+    "title": "/3/ - 3DCG",
+    "boards": [
+      "3dcg-posting.bso"
+    ]
+  },
+  {
+    "code": "a",
+    "title": "/a/ - Anime & Manga",
+    "boards": [
+      "anime-and-manga.bso"
+    ]
+  },
+  {
+    "code": "adv",
+    "title": "/adv/ - Advice",
+    "boards": [
+      "advice-posting.bso"
+    ]
+  },
+  {
+    "code": "an",
+    "title": "/an/ - Animals & Nature",
+    "boards": [
+      "animals-and-nature.bso"
+    ]
+  },
+  {
+    "code": "b",
+    "title": "/b/ - Random",
+    "boards": [
+      "random-nsfw.bso"
+    ]
+  },
+  {
+    "code": "bant",
+    "title": "/bant/ - International/Random",
+    "boards": [
+      "international-nsfw.bso"
+    ]
+  },
+  {
+    "code": "biz",
+    "title": "/biz/ - Business & Finance",
+    "boards": [
+      "bizraelis.bso",
+      "business-and-finance.bso"
+    ]
+  },
+  {
+    "code": "c",
+    "title": "/c/ - Anime/Cute",
+    "boards": [
+      "anime-cute.bso"
+    ]
+  },
+  {
+    "code": "ck",
+    "title": "/ck/ - Food & Cooking",
+    "boards": [
+      "food-and-cooking.bso"
+    ]
+  },
+  {
+    "code": "co",
+    "title": "/co/ - Comics & Cartoons",
+    "boards": [
+      "comics-and-cartoons.bso"
+    ]
+  },
+  {
+    "code": "diy",
+    "title": "/diy/ - Do It Yourself",
+    "boards": [
+      "do-it-yourself.bso"
+    ]
+  },
+  {
+    "code": "f",
+    "title": "/f/ - Flash",
+    "boards": [
+      "flash-posting.bso"
+    ]
+  },
+  {
+    "code": "fa",
+    "title": "/fa/ - Fashion",
+    "boards": [
+      "fashion-posting.bso"
+    ]
+  },
+  {
+    "code": "fit",
+    "title": "/fit/ - Fitness",
+    "boards": [
+      "fitness-posting.bso"
+    ]
+  },
+  {
+    "code": "g",
+    "title": "/g/ - Technology",
+    "boards": [
+      "technology-posting.bso"
+    ]
+  },
+  {
+    "code": "gd",
+    "title": "/gd/ - Graphic Design",
+    "boards": [
+      "graphic-design.bso"
+    ]
+  },
+  {
+    "code": "gif",
+    "title": "/gif/ - Adult GIF",
+    "boards": [
+      "adult-gif.bso"
+    ]
+  },
+  {
+    "code": "his",
+    "title": "/his/ - History & Humanities",
+    "boards": [
+      "history-posting.bso"
+    ]
+  },
+  {
+    "code": "i",
+    "title": "/i/ - Oekaki",
+    "boards": [
+      "oekaki-posting.bso"
+    ]
+  },
+  {
+    "code": "ic",
+    "title": "/ic/ - Artwork/Critique",
+    "boards": [
+      "artwork-critique.bso"
+    ]
+  },
+  {
+    "code": "int",
+    "title": "/int/ - International",
+    "boards": [
+      "international-sfw.bso"
+    ]
+  },
+  {
+    "code": "jp",
+    "title": "/jp/ - Otaku Culture",
+    "boards": [
+      "otaku-culture.bso"
+    ]
+  },
+  {
+    "code": "k",
+    "title": "/k/ - Weapons",
+    "boards": [
+      "weapons-posting.bso"
+    ]
+  },
+  {
+    "code": "lit",
+    "title": "/lit/ - Literature",
+    "boards": [
+      "literature-posting.bso"
+    ]
+  },
+  {
+    "code": "m",
+    "title": "/m/ - Mecha",
+    "boards": [
+      "mecha-posting.bso"
+    ]
+  },
+  {
+    "code": "mlp",
+    "title": "/mlp/ - Pony",
+    "boards": [
+      "pony-posting.bso"
+    ]
+  },
+  {
+    "code": "mu",
+    "title": "/mu/ - Music",
+    "boards": [
+      "music-posting.bso"
+    ]
+  },
+  {
+    "code": "n",
+    "title": "/n/ - Transportation",
+    "boards": [
+      "transportation-posting.bso"
+    ]
+  },
+  {
+    "code": "news",
+    "title": "/news/ - Current News",
+    "boards": [
+      "current-news.bso"
+    ]
+  },
+  {
+    "code": "o",
+    "title": "/o/ - Auto",
+    "boards": [
+      "auto-posting.bso"
+    ]
+  },
+  {
+    "code": "out",
+    "title": "/out/ - Outdoors",
+    "boards": [
+      "outdoors-posting.bso"
+    ]
+  },
+  {
+    "code": "p",
+    "title": "/p/ - Photography",
+    "boards": [
+      "photography-posting.bso"
+    ]
+  },
+  {
+    "code": "po",
+    "title": "/po/ - Papercraft & Origami",
+    "boards": [
+      "papercraft-and-origami.bso"
+    ]
+  },
+  {
+    "code": "pol",
+    "title": "/pol/ - Politically Incorrect",
+    "boards": [
+      "nothing-is-beyond-our-reach.bso",
+      "politically-incorrect.bso"
+    ]
+  },
+  {
+    "code": "pw",
+    "title": "/pw/ - Professional Wrestling",
+    "boards": [
+      "professional-wrestling.bso"
+    ]
+  },
+  {
+    "code": "q",
+    "title": "/q/ - 5chan Feedback",
+    "boards": [
+      "5chan-feedback.bso"
+    ]
+  },
+  {
+    "code": "qst",
+    "title": "/qst/ - Quests",
+    "boards": [
+      "quests-posting.bso"
+    ]
+  },
+  {
+    "code": "r",
+    "title": "/r/ - Adult Requests",
+    "boards": [
+      "adult-requests.bso"
+    ]
+  },
+  {
+    "code": "r9k",
+    "title": "/r9k/ - ROBOT9002",
+    "boards": [
+      "robot9002.bso"
+    ]
+  },
+  {
+    "code": "s5s",
+    "title": "/s5s/ - Shit 5chan Says",
+    "boards": [
+      "shit-5chan-says.bso"
+    ]
+  },
+  {
+    "code": "sci",
+    "title": "/sci/ - Science & Math",
+    "boards": [
+      "science-and-math.bso"
+    ]
+  },
+  {
+    "code": "soc",
+    "title": "/soc/ - Cams & Meetups",
+    "boards": [
+      "cams-and-meetups.bso"
+    ]
+  },
+  {
+    "code": "sp",
+    "title": "/sp/ - Sports",
+    "boards": [
+      "sports-posting.bso"
+    ]
+  },
+  {
+    "code": "t",
+    "title": "/t/ - Torrents",
+    "boards": [
+      "torrentz.bso",
+      "torrents-posting.bso"
+    ]
+  },
+  {
+    "code": "tg",
+    "title": "/tg/ - Traditional Games",
+    "boards": [
+      "traditional-games.bso"
+    ]
+  },
+  {
+    "code": "toy",
+    "title": "/toy/ - Toys",
+    "boards": [
+      "toys-posting.bso"
+    ]
+  },
+  {
+    "code": "trash",
+    "title": "/trash/",
+    "boards": [
+      "off-topic.bso"
+    ]
+  },
+  {
+    "code": "trv",
+    "title": "/trv/ - Travel",
+    "boards": [
+      "travel-posting.bso"
+    ]
+  },
+  {
+    "code": "tv",
+    "title": "/tv/ - Television & Film",
+    "boards": [
+      "television-and-film.bso"
+    ]
+  },
+  {
+    "code": "v",
+    "title": "/v/ - Video Games",
+    "boards": [
+      "videogames-posting.bso"
+    ]
+  },
+  {
+    "code": "vg",
+    "title": "/vg/ - Video Game Generals",
+    "boards": [
+      "videogame-generals.bso"
+    ]
+  },
+  {
+    "code": "vip",
+    "title": "/vip/ - Very Important Posts",
+    "boards": [
+      "very-important-posts.bso"
+    ]
+  },
+  {
+    "code": "vm",
+    "title": "/vm/ - Video Games/Multiplayer",
+    "boards": [
+      "videogames-multiplayer.bso"
+    ]
+  },
+  {
+    "code": "vmg",
+    "title": "/vmg/ - Video Games/Mobile",
+    "boards": [
+      "videogames-mobile.bso"
+    ]
+  },
+  {
+    "code": "vp",
+    "title": "/vp/ - Pokémon",
+    "boards": [
+      "pokemon-posting.bso"
+    ]
+  },
+  {
+    "code": "vr",
+    "title": "/vr/ - Retro Games",
+    "boards": [
+      "retro-games.bso"
+    ]
+  },
+  {
+    "code": "vrpg",
+    "title": "/vrpg/ - Video Games/RPG",
+    "boards": [
+      "videogames-rpg.bso"
+    ]
+  },
+  {
+    "code": "vst",
+    "title": "/vst/ - Video Games/Strategy",
+    "boards": [
+      "videogames-strategy.bso"
+    ]
+  },
+  {
+    "code": "vt",
+    "title": "/vt/ - Virtual YouTubers",
+    "boards": [
+      "virtual-youtubers.bso"
+    ]
+  },
+  {
+    "code": "w",
+    "title": "/w/ - Anime/Wallpapers",
+    "boards": [
+      "anime-wallpapers.bso"
+    ]
+  },
+  {
+    "code": "wg",
+    "title": "/wg/ - Wallpapers/General",
+    "boards": [
+      "wallpapers-general.bso"
+    ]
+  },
+  {
+    "code": "wsg",
+    "title": "/wsg/ - Worksafe GIF",
+    "boards": [
+      "worksafe-gif.bso"
+    ]
+  },
+  {
+    "code": "wsr",
+    "title": "/wsr/ - Worksafe Requests",
+    "boards": [
+      "worksafe-requests.bso"
+    ]
+  },
+  {
+    "code": "x",
+    "title": "/x/ - Paranormal",
+    "boards": [
+      "paranormal-posting.bso"
+    ]
+  },
+  {
+    "code": "xs",
+    "title": "/xs/ - Extreme Sports",
+    "boards": [
+      "extreme-sports.bso"
+    ]
+  }
+]

@@ -65,11 +65,10 @@ export const segmentForAddress = (address: string) => directoryForAddress(addres
 
 export const boardPath = (address: string) => `/${encodeURIComponent(segmentForAddress(address))}`;
 
-/** Canonical thread URL. Replies live on their thread's page, anchored by cid. */
-export function threadPath(post: { community_address: string; cid: string; post_cid: string }): string {
-  const path = `${boardPath(post.community_address)}/thread/${encodeURIComponent(post.post_cid)}`;
-  return post.cid === post.post_cid ? path : `${path}#${replyAnchor(post.cid)}`;
+/** Canonical post URL. Like 5chan, replies use their own cid in the thread route. */
+export function threadPath(post: { community_address: string; cid: string }): string {
+  return `${boardPath(post.community_address)}/thread/${encodeURIComponent(post.cid)}`;
 }
 
-/** Fragment id of a reply within its thread page ("p<cid>", 5chan-style). */
+/** Fragment id retained for old reply links and in-page targeting. */
 export const replyAnchor = (cid: string) => `p${cid}`;

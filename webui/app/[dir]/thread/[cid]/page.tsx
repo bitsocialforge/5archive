@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { Prose } from '@/components/Prose';
+import { ReplyTarget } from '@/components/ReplyTarget';
 import { isTombstone, Tombstone } from '@/components/Tombstone';
 import { getThread } from '@/lib/api';
 import { boardPath, replyAnchor, segmentForAddress, threadPath } from '@/lib/directories';
@@ -24,31 +25,46 @@ function threadTitle(post: Comment): string {
 }
 
 /**
- * Resolve `/<dir>/thread/<cid>`. Like 5chan, the cid may be a reply — the API
- * returns it as its own comment, so send those to the thread they belong to,
- * anchored at the reply. A cid reached under the wrong directory segment
- * redirects to its own, keeping one canonical URL per thread.
+ * Resolve `/<dir>/thread/<cid>`. Like 5chan, the cid may be a reply. Keep that
+ * reply cid in the URL while rendering its root thread and targeting the reply.
+ * A cid reached under the wrong directory segment redirects to its own board.
  */
-async function resolveThread(segment: string, cid: string): Promise<Thread> {
-  const thread = await getThread(cid);
-  if (!thread) notFound();
+async function loadThread(cid: string): Promise<{ requestedPost: Comment; targetReplyCid?: string; thread: Thread } | null> {
+  const requestedThread = await getThread(cid);
+  if (!requestedThread) return null;
 
-  const { post } = thread;
-  if (post.cid !== post.post_cid) permanentRedirect(threadPath(post));
-  if (segment !== segmentForAddress(post.community_address)) permanentRedirect(threadPath(post));
-  return thread;
+  const requestedPost = requestedThread.post;
+  if (requestedPost.cid === requestedPost.post_cid) {
+    return { requestedPost, thread: requestedThread };
+  }
+
+  const rootThread = await getThread(requestedPost.post_cid);
+  if (!rootThread) return null;
+
+  return { requestedPost, targetReplyCid: requestedPost.cid, thread: rootThread };
+}
+
+async function resolveThread(segment: string, cid: string) {
+  const resolved = await loadThread(cid);
+  if (!resolved) notFound();
+
+  if (segment !== segmentForAddress(resolved.requestedPost.community_address)) {
+    permanentRedirect(threadPath(resolved.requestedPost));
+  }
+  return resolved;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { cid } = await params;
-  const thread = await getThread(decodeURIComponent(cid));
-  if (!thread) return { title: 'Thread not found', robots: { index: false } };
+  const resolved = await loadThread(decodeURIComponent(cid));
+  if (!resolved) return { title: 'Thread not found', robots: { index: false } };
 
+  const { requestedPost, thread } = resolved;
   const { post } = thread;
   const title = threadTitle(post);
   const description =
     excerpt(post.content) || `A thread from ${post.community_address} with ${post.reply_count} replies.`;
-  const canonical = threadPath(post);
+  const canonical = threadPath(requestedPost);
 
   return {
     title,
@@ -63,16 +79,18 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     },
     twitter: { card: 'summary', title, description },
     // Redacted tombstones have no content worth indexing.
-    robots: isTombstone(post) ? { index: false } : undefined,
+    robots: isTombstone(requestedPost) ? { index: false } : undefined,
   };
 }
 
 export default async function ThreadPage({ params }: Params) {
   const { dir, cid } = await params;
-  const { post, replies } = await resolveThread(decodeURIComponent(dir), decodeURIComponent(cid));
+  const { targetReplyCid, thread } = await resolveThread(decodeURIComponent(dir), decodeURIComponent(cid));
+  const { post, replies } = thread;
 
   return (
     <article>
+      <ReplyTarget cid={targetReplyCid} />
       <div className="results-head">
         <Link href={boardPath(post.community_address)} className="chip">
           /{segmentForAddress(post.community_address)}/
@@ -107,7 +125,11 @@ export default async function ThreadPage({ params }: Params) {
         {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
       </h2>
       {replies.map((r) => (
-        <div className={`reply${isTombstone(r) ? ' reply-tombstone' : ''}`} key={r.cid} id={replyAnchor(r.cid)}>
+        <div
+          className={`reply${r.cid === targetReplyCid ? ' reply-target' : ''}${isTombstone(r) ? ' reply-tombstone' : ''}`}
+          key={r.cid}
+          id={replyAnchor(r.cid)}
+        >
           <div className="meta">
             <span>{r.author_name ?? 'anon'}</span>
             <span>·</span>
@@ -115,9 +137,9 @@ export default async function ThreadPage({ params }: Params) {
             <span>·</span>
             <span>▲ {score(r)}</span>
             <span>·</span>
-            <a className="permalink" href={`#${replyAnchor(r.cid)}`} title={r.cid}>
+            <Link className="permalink" href={threadPath(r)} title={r.cid}>
               No.{r.cid.slice(-8)}
-            </a>
+            </Link>
           </div>
           {isTombstone(r) ? <Tombstone comment={r} /> : <Prose text={r.content ?? ''} />}
         </div>

@@ -13,10 +13,6 @@ export const revalidate = 300;
 
 type Params = { params: Promise<{ dir: string; cid: string }> };
 
-function score(c: Comment) {
-  return c.upvote_count - c.downvote_count;
-}
-
 function threadTitle(post: Comment): string {
   if (post.takedown || post.removed) return '[removed]';
   if (post.deleted) return '[deleted]';
@@ -87,8 +83,6 @@ export default async function ThreadPage({ params }: Params) {
       <div className="card thread-op">
         <h1>{threadTitle(post)}</h1>
         <div className="meta">
-          <span>▲ {score(post)}</span>
-          <span>·</span>
           <span>{post.author_name ?? 'anon'}</span>
           <span>·</span>
           <time dateTime={new Date(post.timestamp * 1000).toISOString()}>{timeAgo(post.timestamp)}</time>
@@ -112,8 +106,6 @@ export default async function ThreadPage({ params }: Params) {
             <span>{r.author_name ?? 'anon'}</span>
             <span>·</span>
             <time dateTime={new Date(r.timestamp * 1000).toISOString()}>{timeAgo(r.timestamp)}</time>
-            <span>·</span>
-            <span>▲ {score(r)}</span>
             <span>·</span>
             <a className="permalink" href={`#${replyAnchor(r.cid)}`} title={r.cid}>
               No.{r.cid.slice(-8)}

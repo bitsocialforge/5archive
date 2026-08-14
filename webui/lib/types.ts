@@ -22,8 +22,6 @@ export interface Comment {
   content: string | null;
   link: string | null;
   thumbnail_url: string | null;
-  upvote_count: number;
-  downvote_count: number;
   reply_count: number;
   indexed_at: number;
   /** 1 when the thread is no longer live upstream (served from the archive). */

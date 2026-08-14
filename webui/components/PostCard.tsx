@@ -3,11 +3,9 @@ import { timeAgo } from '@/lib/format';
 import type { Comment } from '@/lib/types';
 
 export function PostCard({ post }: { post: Comment }) {
-  const score = post.upvote_count - post.downvote_count;
   const heading = post.title || post.content?.slice(0, 90) || 'untitled';
   return (
     <article className="card post">
-      <div className="post-score" title="score">▲ {score}</div>
       <div className="post-body">
         <Link href={`/c/${encodeURIComponent(post.cid)}`} className="post-title">
           {heading}

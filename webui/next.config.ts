@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Scope build-trace root to this app (ignore unrelated parent lockfiles).
   outputFileTracingRoot: dirname(fileURLToPath(import.meta.url)),
+  // `yarn start` serves dev through portless (https://5archive.localhost), a
+  // different origin than the port the dev server binds. Dev-only setting.
+  allowedDevOrigins: ['localhost', '*.localhost', '*.5archive.localhost'],
 };
 
 export default nextConfig;

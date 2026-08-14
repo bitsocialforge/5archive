@@ -73,6 +73,42 @@ Two deployments:
 | `.env.example` | Documents every env var; real `.env` lives only on the VPS |
 | `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
 
+## Local development
+
+Same workflow as the other Bitsocial clients (5chan, seedit): one `yarn start`
+runs the web UI on a stable named URL through
+[portless](https://www.npmjs.com/package/portless) — no port numbers to
+remember, and the browser opens by itself.
+
+```bash
+corepack yarn install     # root dev tooling, and webui/ deps via npm
+corepack yarn start       # https://5archive.localhost
+```
+
+| Command | What it does |
+|---|---|
+| `yarn start` | Next.js dev server (HMR) at `https://5archive.localhost` |
+| `yarn start:preview` | Production build of `webui/`, served at the same URL |
+| `yarn build` | `next build` in `webui/` |
+| `yarn type-check` | `tsc --noEmit` in `webui/` |
+| `yarn communities:build` | Regenerates `config/communities.json` |
+
+The first portless run asks for sudo once to bind port 443 and trust its local
+CA. On a branch other than `master` the URL becomes
+`https://<branch>.5archive.localhost`, so several checkouts can run at the same
+time. `PORTLESS=0 yarn start` skips portless and serves
+`http://localhost:3000` instead (also the automatic Windows fallback).
+
+Dev defaults live in `webui/.env.development`: the local UI reads the public
+production API (`https://api.5archive.org`), so `yarn start` shows the real
+archive without running a crawler. Override anything in `webui/.env.local`
+(gitignored) — e.g. `INDEXER_API=http://localhost:4000` to develop against a
+local indexer from `docker-compose.yml`.
+
+`webui/` keeps its own npm lockfile because Vercel deploys that directory as
+the project root; the root yarn project owns only the dev workflow and installs
+`webui/` for you.
+
 ## Setup
 
 See **[DEPLOY.md](DEPLOY.md)** for the complete runbook. The short version:

@@ -12,3 +12,11 @@ data/
 *.db-wal
 .DS_Store
 *.log
+
+# yarn (root dev workflow)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnp.*

@@ -1,0 +1,22 @@
+{
+  "name": "5archive",
+  "version": "0.0.1",
+  "description": "The permanent public archive and search engine for 5chan boards",
+  "author": "Bitsocial Forge",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "private": true,
+  "packageManager": "yarn@4.17.1",
+  "scripts": {
+    "start": "node scripts/start-dev.js",
+    "start:preview": "node scripts/start-preview.js",
+    "build": "npm --prefix webui run build",
+    "type-check": "npm --prefix webui run typecheck",
+    "webui:install": "node scripts/install-webui.mjs --force",
+    "communities:build": "node scripts/build-communities.mjs",
+    "postinstall": "node scripts/install-webui.mjs"
+  },
+  "optionalDependencies": {
+    "portless": "0.11.1"
+  }
+}

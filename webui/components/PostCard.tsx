@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { boardPath, segmentForAddress, threadPath } from '@/lib/directories';
 import { timeAgo } from '@/lib/format';
 import type { Comment } from '@/lib/types';
 
@@ -9,12 +10,12 @@ export function PostCard({ post }: { post: Comment }) {
     <article className="card post">
       <div className="post-score" title="score">▲ {score}</div>
       <div className="post-body">
-        <Link href={`/c/${encodeURIComponent(post.cid)}`} className="post-title">
+        <Link href={threadPath(post)} className="post-title">
           {heading}
         </Link>
         <div className="meta">
-          <Link href={`/p/${encodeURIComponent(post.community_address)}`} className="chip">
-            {post.community_address}
+          <Link href={boardPath(post.community_address)} className="chip">
+            /{segmentForAddress(post.community_address)}/
           </Link>
           <span>{post.author_name ?? 'anon'}</span>
           <span>·</span>

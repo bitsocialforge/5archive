@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn, spawnSync } from 'node:child_process';
@@ -11,7 +11,39 @@ export const appLabel = '5archive';
 export const isWindows = process.platform === 'win32';
 export const usePortless = process.env.PORTLESS !== '0' && !isWindows;
 export const executableSuffix = isWindows ? '.cmd' : '';
-export const portlessBin = join(repoRoot, 'node_modules', '.bin', `portless${executableSuffix}`);
+
+function gitOutput(args, cwd = repoRoot) {
+  const result = spawnSync('git', args, { cwd, encoding: 'utf8' });
+
+  return result.status === 0 ? result.stdout.trim() || null : null;
+}
+
+/** The checkout that owns .git — a worktree's parent, or repoRoot itself. */
+function getPrimaryCheckout() {
+  const commonDir = gitOutput(['rev-parse', '--path-format=absolute', '--git-common-dir']);
+
+  return commonDir ? dirname(commonDir) : repoRoot;
+}
+
+/**
+ * portless is the only root dependency, and git worktrees start out without a
+ * root install of their own. Borrow the primary checkout's binary rather than
+ * silently dropping to `next dev` on localhost:PORT, so every worktree gets its
+ * own <branch>.5archive.localhost host.
+ */
+function resolvePortlessBin() {
+  const localBin = join(repoRoot, 'node_modules', '.bin', `portless${executableSuffix}`);
+
+  if (existsSync(localBin)) {
+    return localBin;
+  }
+
+  const sharedBin = join(getPrimaryCheckout(), 'node_modules', '.bin', `portless${executableSuffix}`);
+
+  return existsSync(sharedBin) ? sharedBin : localBin;
+}
+
+export const portlessBin = resolvePortlessBin();
 export const nextBin = join(webuiDir, 'node_modules', '.bin', `next${executableSuffix}`);
 export const npmBin = `npm${executableSuffix}`;
 export const fallbackHost = '127.0.0.1';
@@ -98,16 +130,40 @@ export function sanitizeLabel(value) {
 }
 
 export function getCurrentBranch() {
-  const result = spawnSync('git', ['branch', '--show-current'], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-  });
+  return gitOutput(['branch', '--show-current']);
+}
 
-  if (result.status !== 0) {
-    return null;
+function samePath(a, b) {
+  try {
+    return realpathSync(a) === realpathSync(b);
+  } catch {
+    return a === b;
+  }
+}
+
+/**
+ * yarn walks up to the nearest project when the directory it was invoked from
+ * has no package.json, so `yarn start` inside a worktree branched before this
+ * workflow existed quietly boots the primary checkout — serving master while
+ * looking like it serves the worktree. Refuse instead of serving the wrong tree.
+ */
+export function assertInvokedFromThisCheckout() {
+  const invokedFrom = process.env.INIT_CWD;
+
+  if (!invokedFrom || !existsSync(invokedFrom) || samePath(invokedFrom, repoRoot)) {
+    return;
   }
 
-  return result.stdout.trim() || null;
+  const invokedRoot = gitOutput(['rev-parse', '--show-toplevel'], invokedFrom);
+
+  if (!invokedRoot || samePath(invokedRoot, repoRoot)) {
+    return;
+  }
+
+  console.error(`Refusing to start: yarn was run in ${invokedRoot}, but resolved this script from ${repoRoot} (branch ${getCurrentBranch() ?? 'unknown'}).`);
+  console.error(`${invokedRoot} has no package.json of its own, so it would serve the other checkout's code.`);
+  console.error(`Update that checkout first — from inside it, run: git merge master`);
+  process.exit(1);
 }
 
 export function getActivePortlessRouteHosts() {

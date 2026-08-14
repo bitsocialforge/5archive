@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import {
   appLabel,
+  assertInvokedFromThisCheckout,
   ensurePortlessProxy,
   ensureWebuiDependencies,
   fallbackHost,
@@ -18,6 +19,8 @@ import {
 import { resolvePort } from './dev-server-utils.mjs';
 
 const fallbackRequestedPort = Number(process.env.PORT) || 3000;
+
+assertInvokedFromThisCheckout();
 
 console.log('Note: yarn start runs Next.js in development mode. Use yarn start:preview for production-like local performance checks.');
 

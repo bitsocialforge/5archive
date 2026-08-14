@@ -1,5 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
 import {
+  assertInvokedFromThisCheckout,
   ensurePortlessProxy,
   ensureWebuiDependencies,
   fallbackHost,
@@ -20,6 +21,8 @@ import {
 import { resolvePort } from './dev-server-utils.mjs';
 
 const fallbackRequestedPort = Number(process.env.PORT) || 4173;
+
+assertInvokedFromThisCheckout();
 
 ensureWebuiDependencies();
 

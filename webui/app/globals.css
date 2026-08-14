@@ -146,7 +146,11 @@ main.container { flex: 1; padding-top: 2.25rem; padding-bottom: 4rem; }
 .thread-op { padding: 1.25rem 1.4rem; margin-bottom: 1.25rem; }
 .thread-op h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
 .prose { color: var(--silver-bright); white-space: pre-wrap; margin: 0.5rem 0 0; }
-.reply { padding: 0.9rem 1.15rem; margin: 0 0 0.6rem; background: var(--panel); border: 1px solid var(--border); border-left: 2px solid var(--accent-2); border-radius: var(--radius-sm); }
+.reply { padding: 0.9rem 1.15rem; margin: 0 0 0.6rem; background: var(--panel); border: 1px solid var(--border); border-left: 2px solid var(--accent-2); border-radius: var(--radius-sm); scroll-margin-top: 5rem; }
+/* Linked reply (/<dir>/thread/<cid> sends a reply cid here as #p<cid>). */
+.reply:target { background: var(--panel-2); border-color: var(--accent); }
+.permalink { color: var(--muted); font-variant-numeric: tabular-nums; }
+.permalink:hover { color: var(--accent); }
 .muted { color: var(--muted); }
 .greentext { color: var(--greentext); }
 
@@ -235,6 +239,9 @@ html[data-theme='5chan'] .thread-op h1 { color: #cc1105; font-size: 1.2rem; }
 html[data-theme='5chan'] .prose { color: maroon; }
 html[data-theme='5chan'] .reply { padding: 0.55rem 0.8rem; margin-bottom: 0.3rem; border-left: 1px solid var(--border); }
 html[data-theme='5chan'] .reply .meta > span:first-child { color: #117743; font-weight: 700; }
+html[data-theme='5chan'] .reply:target { background: #d6bad0; border-color: #ba9dbf; }
+html[data-theme='5chan'] .permalink { color: navy; }
+html[data-theme='5chan'] .permalink:hover { color: red; }
 html[data-theme='5chan'] .notice { border-left-color: var(--accent); color: maroon; }
 html[data-theme='5chan'] .legal section a { color: #00e; }
 html[data-theme='5chan'] .legal section a:hover { color: red; }

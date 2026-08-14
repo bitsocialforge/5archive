@@ -4,6 +4,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { ApiDown } from '@/components/Notice';
 import { PostCard } from '@/components/PostCard';
 import { getCommunities, getHealth, getPosts } from '@/lib/api';
+import { adHocDirectory, directoryForAddress } from '@/lib/directories';
+import type { Community } from '@/lib/types';
 
 // Render at request time (never bake an "API down" page into the build); the
 // fetches themselves are cached in the data cache (see lib/api.ts).
@@ -14,6 +16,21 @@ export const metadata: Metadata = {
   openGraph: { url: '/' },
 };
 
+/**
+ * Boards indexed under each directory code, collapsed into one entry per code
+ * (several boards can hold the same code — see lib/directories), busiest first.
+ */
+function directoryIndex(communities: Community[]) {
+  const entries = new Map<string, { code: string; title: string; threads: number }>();
+  for (const community of communities) {
+    const dir = directoryForAddress(community.address) ?? adHocDirectory(community);
+    const entry = entries.get(dir.code) ?? { code: dir.code, title: dir.title, threads: 0 };
+    entry.threads += community.post_count;
+    entries.set(dir.code, entry);
+  }
+  return [...entries.values()].sort((a, b) => b.threads - a.threads || a.code.localeCompare(b.code));
+}
+
 export default async function Home() {
   const [health, communitiesRes] = await Promise.all([getHealth(), getCommunities()]);
 
@@ -23,11 +40,12 @@ export default async function Home() {
   if (communities.length === 0) return <EmptyState />;
 
   const posts = (await getPosts('?sort=new&limit=25'))?.posts ?? [];
+  const boards = directoryIndex(communities);
 
   return (
     <div className="layout">
       <section>
-        <h2 className="section-title">Recent across {communities.length} communities</h2>
+        <h2 className="section-title">Recent across {boards.length} boards</h2>
         {posts.length === 0 ? (
           <div className="notice">Communities are configured, but nothing has been indexed yet.</div>
         ) : (
@@ -36,13 +54,13 @@ export default async function Home() {
       </section>
 
       <aside className="sidebar">
-        <h2 className="section-title">Communities</h2>
+        <h2 className="section-title">Boards</h2>
         <ul className="community-list">
-          {communities.map((c) => (
-            <li key={c.address}>
-              <Link href={`/p/${encodeURIComponent(c.address)}`}>
-                <span>{c.title ?? c.address}</span>
-                <span className="count">{c.post_count}</span>
+          {boards.map((board) => (
+            <li key={board.code}>
+              <Link href={`/${encodeURIComponent(board.code)}`}>
+                <span>{board.title}</span>
+                <span className="count">{board.threads}</span>
               </Link>
             </li>
           ))}

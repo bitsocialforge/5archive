@@ -17,7 +17,7 @@ export function SiteFooter() {
         ) : null}
         <span>
           <Link href="/legal">Legal</Link> · Open source ·{' '}
-          <a href="https://github.com/bitsocialnet/bitsocial-indexer">GPL-3.0-or-later</a>
+          <a href="https://github.com/bitsocialforge/5archive">GPL-3.0-or-later</a>
         </span>
       </div>
     </footer>

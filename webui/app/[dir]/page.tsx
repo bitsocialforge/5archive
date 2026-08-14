@@ -6,7 +6,7 @@ import { getCommunity, getPosts } from '@/lib/api';
 import { adHocDirectory, type Directory, directoryForAddress, getDirectory } from '@/lib/directories';
 
 // Cache the rendered page; identical fetches are deduped with generateMetadata.
-export const revalidate = 300;
+export const revalidate = 5;
 
 const THREADS_PER_PAGE = 50;
 
@@ -33,7 +33,7 @@ async function resolveDirectory(segment: string): Promise<Directory> {
 async function directoryThreads(dir: Directory) {
   const pages = await Promise.all(
     dir.boards.map((address) =>
-      getPosts(`?community=${encodeURIComponent(address)}&sort=new&limit=${THREADS_PER_PAGE}`, 300),
+      getPosts(`?community=${encodeURIComponent(address)}&sort=new&limit=${THREADS_PER_PAGE}`, 5),
     ),
   );
   if (pages.every((page) => page === null)) return null;

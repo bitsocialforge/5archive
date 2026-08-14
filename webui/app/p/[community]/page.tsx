@@ -4,7 +4,7 @@ import { boardPath, directoryForAddress } from '@/lib/directories';
 
 // Legacy URL: boards moved from /p/<address> to their 5chan directory code
 // (/biz). Kept as a permanent redirect so indexed links and old bookmarks live.
-export const revalidate = 300;
+export const revalidate = 5;
 
 type Params = { params: Promise<{ community: string }> };
 

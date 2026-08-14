@@ -33,7 +33,11 @@ services:
       # watches this file — edits apply within ~a minute, no restart needed.
       BLOCKLIST_SOURCE: /config/blocklist.json
       DB_PATH: /data/5archive.db
-      CRAWL_INTERVAL_MS: ${CRAWL_INTERVAL_MS:-300000}
+      # Keep every board close to live. The engine enforces a bounded worker
+      # pool, skips overlapping scheduler passes, and resets timed-out RPC work.
+      CRAWL_INTERVAL_MS: ${CRAWL_INTERVAL_MS:-5000}
+      CRAWL_CONCURRENCY: ${CRAWL_CONCURRENCY:-8}
+      CRAWL_TIMEOUT_MS: ${CRAWL_TIMEOUT_MS:-30000}
       CRAWL_MAX_PAGES: ${CRAWL_MAX_PAGES:-20}
       # CORS: only the Vercel-hosted web UI may call the API from a browser.
       # ALLOWED_ORIGINS is the engine's new env name; CORS_ORIGIN is the one the

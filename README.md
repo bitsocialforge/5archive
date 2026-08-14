@@ -99,6 +99,13 @@ CA. On a branch other than `master` the URL becomes
 time. `PORTLESS=0 yarn start` skips portless and serves
 `http://localhost:3000` instead (also the automatic Windows fallback).
 
+Git worktrees count as separate checkouts: run `yarn install` once inside a new
+one (yarn refuses to run scripts otherwise), then `yarn start` there serves that
+worktree's branch on its own `https://<branch>.5archive.localhost` host. If a
+worktree predates this workflow it has no `package.json`, so yarn would walk up
+and start the primary checkout instead — `yarn start` stops with instructions
+rather than serving the wrong branch.
+
 Dev defaults live in `webui/.env.development`: the local UI reads the public
 production API (`https://api.5archive.org`), so `yarn start` shows the real
 archive without running a crawler. Override anything in `webui/.env.local`

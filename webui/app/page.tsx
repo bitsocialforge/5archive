@@ -2,9 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/EmptyState';
 import { ApiDown } from '@/components/Notice';
+import { JsonLd } from '@/components/JsonLd';
 import { PostCard } from '@/components/PostCard';
+import { UpstreamHomeIntro } from '@/components/Upstream';
 import { getCommunities, getHealth, getPosts } from '@/lib/api';
 import { adHocDirectory, directoryForAddress } from '@/lib/directories';
+import { siteGraph } from '@/lib/jsonld';
+import { siteDescription } from '@/lib/site';
 import type { Community } from '@/lib/types';
 
 // Render at request time (never bake an "API down" page into the build); the
@@ -43,29 +47,33 @@ export default async function Home() {
   const boards = directoryIndex(communities);
 
   return (
-    <div className="layout">
-      <section>
-        <h2 className="section-title">Recent across {boards.length} boards</h2>
-        {posts.length === 0 ? (
-          <div className="notice">Communities are configured, but nothing has been indexed yet.</div>
-        ) : (
-          posts.map((p) => <PostCard key={p.cid} post={p} />)
-        )}
-      </section>
+    <>
+      <JsonLd graph={siteGraph(siteDescription)} />
+      <UpstreamHomeIntro />
+      <div className="layout">
+        <section>
+          <h2 className="section-title">Recent across {boards.length} boards</h2>
+          {posts.length === 0 ? (
+            <div className="notice">Communities are configured, but nothing has been indexed yet.</div>
+          ) : (
+            posts.map((p) => <PostCard key={p.cid} post={p} />)
+          )}
+        </section>
 
-      <aside className="sidebar">
-        <h2 className="section-title">Boards</h2>
-        <ul className="community-list">
-          {boards.map((board) => (
-            <li key={board.code}>
-              <Link href={`/${encodeURIComponent(board.code)}`}>
-                <span>{board.title}</span>
-                <span className="count">{board.threads}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </aside>
-    </div>
+        <aside className="sidebar">
+          <h2 className="section-title">Boards</h2>
+          <ul className="community-list">
+            {boards.map((board) => (
+              <li key={board.code}>
+                <Link href={`/${encodeURIComponent(board.code)}`}>
+                  <span>{board.title}</span>
+                  <span className="count">{board.threads}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+    </>
   );
 }

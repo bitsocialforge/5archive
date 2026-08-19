@@ -1,11 +1,20 @@
 import Link from 'next/link';
-import { brandText, brandUrl } from '@/lib/site';
+import { brandText, brandUrl, upstreamName, upstreamUrl } from '@/lib/site';
+import { hasUpstream } from '@/lib/upstream';
 
 export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="container">
-        <span>A neutral indexer for the Bitsocial network.</span>
+        {/* Says what this site is on every page — the one line a search visitor
+            needs to understand they've landed on the archive, not the network. */}
+        {hasUpstream ? (
+          <span>
+            The permanent archive of <a href={upstreamUrl}>{upstreamName}</a>.
+          </span>
+        ) : (
+          <span>A neutral indexer for the Bitsocial network.</span>
+        )}
         {brandText ? (
           <span className="brand-line">
             {brandUrl ? (

@@ -1,4 +1,4 @@
-import { siteUrl } from './site';
+export { absUrl } from './site';
 
 /**
  * Sitemap plumbing shared by app/sitemap.xml and app/sitemaps/[community].
@@ -20,8 +20,6 @@ export const SITEMAP_TTL = 3_600;
 export const CORE_SITEMAP = 'core';
 
 export const xmlEscape = (s: string) => s.replace(/[<>&'"]/g, (c) => `&#${c.charCodeAt(0)};`);
-
-export const absUrl = (path: string) => `${siteUrl}${path}`;
 
 /** XML response, CDN-cached (Vercel respects s-maxage) so crawls stay cheap. */
 export function xmlResponse(body: string, status = 200): Response {

@@ -95,6 +95,46 @@ new ones. A board that upstream drops from the directory lists while its threads
 stay archived is served under its address (`5archive.org/<address>`), so nothing
 indexed becomes unreachable.
 
+## Sending readers to 5chan
+
+Search traffic lands on 5archive rather than 5chan, because 5chan is a
+client-rendered SPA whose threads can't rank. The archive's job is to catch that
+traffic and hand it on — but it can only do that by staying a real page.
+Redirecting search visitors to 5chan would hand the ranking back to a page
+Google can't read, and redirecting only humans is cloaking. So the way out is
+links, not redirects, and they are calibrated to whether the thread still exists
+upstream (`webui/lib/upstream.ts`, `webui/components/Upstream.tsx`):
+
+| Thread state | Reader is offered |
+|--------------|-------------------|
+| Live upstream (`archived = 0`) | The thread itself — beside the heading, and as the call to action after the last reply, which also offers the board as a fallback |
+| Purged (`archived = 1`) | Its board. 5chan drops threads 48h after archiving them, and a dead thread on a p2p network hangs rather than 404s, so thread links are never offered |
+
+Every page also carries a link to 5chan in the sticky header — the one that
+can't rot, and the only one a reader who never reaches the bottom of a long
+thread will see — plus a provenance line under the opening post naming where
+the thread came from and when it was archived.
+
+Three rules matter when touching this:
+
+- **Link boards by address, never by directory code.** Codes are contested —
+  several boards compete for `/biz/` and the winner rotates — so `#/biz` can
+  resolve to a different board than the thread was archived from. Only the
+  directory page itself, whose subject *is* the code, links by code.
+- **Keep the links plain and followed.** They point at a sibling first-party
+  site; `nofollow` and `noreferrer` are both wrong here (the second would hide
+  from 5chan that the archive is what sent the reader).
+- **Don't add a link per reply.** 5chan resolves any reply cid to its root
+  thread, and because its routes live in the URL fragment, search engines
+  collapse every such link to the same `5chan.app` URL — a hundred replies
+  would mean a hundred identical outbound links. Only the reply a permalink
+  actually targets gets one.
+
+Thread pages also carry `DiscussionForumPosting` JSON-LD (`webui/lib/jsonld.ts`)
+describing the OP and every rendered reply. It only ever describes what the page
+displays: no upstream URLs, no images the archive doesn't render, and redacted
+replies quote the same placeholder the reader sees.
+
 ## Local development
 
 Same workflow as the other Bitsocial clients (5chan, seedit): one `yarn start`

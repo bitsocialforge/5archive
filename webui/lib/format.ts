@@ -15,6 +15,19 @@ export function timeAgo(sec: number): string {
   return 'just now';
 }
 
+/**
+ * Absolute date, fixed locale and UTC so a server render can't disagree with
+ * the machine-readable timestamp beside it or drift with the host's timezone.
+ */
+const dateFormat = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+export const formatDate = (sec: number): string => dateFormat.format(new Date(sec * 1000));
+
 /** Single-line excerpt for meta descriptions / OG tags. */
 export function excerpt(text: string | null | undefined, max = 160): string {
   if (!text) return '';

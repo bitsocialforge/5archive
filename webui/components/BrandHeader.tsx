@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { siteBadge, siteName, siteTitle } from '@/lib/site';
 import { SearchBar } from './SearchBar';
+import { UpstreamHeaderLink } from './Upstream';
 
 export function BrandHeader() {
   return (
@@ -12,6 +13,7 @@ export function BrandHeader() {
           <span className="brand-name">{siteName}</span>
           {siteBadge ? <span className="badge">{siteBadge}</span> : null}
         </Link>
+        <UpstreamHeaderLink />
         <div className="header-search">
           <SearchBar compact />
         </div>

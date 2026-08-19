@@ -1,9 +1,12 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
+import { JsonLd } from '@/components/JsonLd';
 import { ApiDown } from '@/components/Notice';
 import { PostCard } from '@/components/PostCard';
+import { UpstreamBoardCta } from '@/components/Upstream';
 import { getCommunity, getPosts } from '@/lib/api';
 import { adHocDirectory, type Directory, directoryForAddress, getDirectory } from '@/lib/directories';
+import { boardGraph } from '@/lib/jsonld';
 
 // Cache the rendered page; identical fetches are deduped with generateMetadata.
 export const revalidate = 5;
@@ -43,12 +46,16 @@ async function directoryThreads(dir: Directory) {
     .slice(0, THREADS_PER_PAGE);
 }
 
+/** Shared with the page's structured data, so the two can't describe it differently. */
+const describe = (dir: Directory) =>
+  `Archived 5chan threads from ${dir.title}, permanently readable and searchable.`;
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { dir: segment } = await params;
   const dir = await resolveDirectory(decodeURIComponent(segment));
 
   const title = dir.title;
-  const description = `Archived 5chan threads from ${dir.title}, permanently readable and searchable.`;
+  const description = describe(dir);
   const canonical = `/${encodeURIComponent(dir.code)}`;
 
   return {
@@ -76,6 +83,7 @@ export default async function DirectoryPage({ params }: Params) {
 
   return (
     <div>
+      <JsonLd graph={boardGraph(dir.code, dir.title, describe(dir))} />
       <div className="results-head">
         <h1>{dir.title}</h1>
         <p>
@@ -83,6 +91,11 @@ export default async function DirectoryPage({ params }: Params) {
           {indexed.length > 0 ? ` · ${indexed.map((b) => b.address).join(' · ')}` : ''}
         </p>
       </div>
+      <UpstreamBoardCta
+        code={dir.code}
+        title={dir.title}
+        liveThreads={threads.filter((t) => !t.archived).length}
+      />
       {threads.length === 0 ? (
         <div className="notice">No threads indexed for this directory yet.</div>
       ) : (

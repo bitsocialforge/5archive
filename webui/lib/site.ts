@@ -1,11 +1,17 @@
-// Instance identity, read at request time (server components) so an operator
-// can re-label their instance via env without rebuilding. Defaults to Bitsocial.
+// Instance identity, read once when this module loads in the server process, so
+// an operator can re-label their instance via env without rebuilding. None of
+// these are NEXT_PUBLIC_ vars, so none are inlined into the bundle at build
+// time — but a statically prerendered route does freeze whatever the build saw.
+// Defaults to Bitsocial.
 export const siteName = process.env.SITE_NAME ?? 'Bitsocial';
 export const siteBadge = process.env.SITE_BADGE ?? 'Indexer';
 export const siteTitle = [siteName, siteBadge].filter(Boolean).join(' ');
 
 /** Public origin of this web UI — canonical URLs, OpenGraph, robots, sitemaps. */
 export const siteUrl = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
+
+/** Absolute URL for a site-relative path — sitemaps, JSON-LD. */
+export const absUrl = (path: string) => `${siteUrl}${path}`;
 
 /** UI skin: "default" (Bitsocial dark) or "5chan" (classic imageboard). */
 export const theme = process.env.THEME === '5chan' ? '5chan' : 'default';
@@ -22,3 +28,23 @@ export const brandUrl = process.env.BRAND_URL ?? '';
  * Unset = the page says requests are handled by the instance operator.
  */
 export const contactEmail = process.env.CONTACT_EMAIL ?? '';
+
+/**
+ * The live network this instance archives (5archive → 5chan). Both must be set
+ * for any of the upstream links to render, so a plain indexer stays neutral and
+ * never advertises somebody else's app. See lib/upstream.ts for the link rules.
+ */
+export const upstreamName = process.env.UPSTREAM_NAME ?? '';
+export const upstreamUrl = (process.env.UPSTREAM_URL ?? '').replace(/\/+$/, '');
+
+/** Absolute gate on everything upstream-facing. Re-exported by lib/upstream.ts. */
+export const hasUpstream = Boolean(upstreamName && upstreamUrl);
+
+/**
+ * One-line description of the instance, shared by page metadata and the site's
+ * structured data. An instance with no upstream configured must not claim to
+ * archive one.
+ */
+export const siteDescription = hasUpstream
+  ? `The permanent archive of ${upstreamName}.`
+  : 'A self-hostable search index for the Bitsocial network.';

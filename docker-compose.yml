@@ -39,11 +39,15 @@ services:
       CRAWL_CONCURRENCY: ${CRAWL_CONCURRENCY:-8}
       CRAWL_TIMEOUT_MS: ${CRAWL_TIMEOUT_MS:-30000}
       CRAWL_MAX_PAGES: ${CRAWL_MAX_PAGES:-20}
-      # CORS: only the Vercel-hosted web UI may call the API from a browser.
+      # CORS: the Vercel-hosted web UI and 5chan.app's in-app search may call
+      # the API from a browser. Comma-separated allowlist — keep 5chan.app here
+      # or in-app search breaks, and never set it to `*`: the engine already
+      # falls back to `*` when this is unset, so an open API is the failure mode
+      # of a missing value, not something you have to opt into.
       # ALLOWED_ORIGINS is the engine's new env name; CORS_ORIGIN is the one the
       # current tip reads — set both so this works across engine versions.
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://5archive.org}
-      CORS_ORIGIN: ${ALLOWED_ORIGINS:-https://5archive.org}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://5archive.org,https://5chan.app}
+      CORS_ORIGIN: ${ALLOWED_ORIGINS:-https://5archive.org,https://5chan.app}
     volumes:
       - ./config:/config:ro
       - data:/data

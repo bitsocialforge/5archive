@@ -29,7 +29,7 @@ ssh root@91.234.199.189
 cat > /opt/5archive/.env <<'EOF'
 PKC_RPC_URL=ws://localhost:9138
 SITE_URL=https://5archive.org
-ALLOWED_ORIGINS=https://5archive.org
+ALLOWED_ORIGINS=https://5archive.org,https://5chan.app
 CRAWL_INTERVAL_MS=5000
 CRAWL_CONCURRENCY=8
 CRAWL_TIMEOUT_MS=30000
@@ -54,6 +54,17 @@ Verify:
 ```bash
 docker compose logs -f server        # crawler should connect to the daemon
 curl -s http://127.0.0.1:4000/api/health
+
+# CORS allowlist: the first two origins must be echoed back, the third must not.
+# The engine defaults to `*` when ALLOWED_ORIGINS is unset, so this is the check
+# that catches a missing, misspelled, or unexported env var — without it, an
+# open API looks identical to a correctly configured one.
+for o in https://5chan.app https://5archive.org https://unlisted.example; do
+  printf '%s -> ' "$o"
+  curl -sS -D - -o /dev/null -H "Origin: $o" \
+    'https://api.5archive.org/api/search?q=test&limit=1' \
+    | grep -i '^access-control-allow-origin:' || echo '(none — correctly blocked)'
+done
 ```
 
 Notes:

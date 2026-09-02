@@ -15,8 +15,8 @@ This is the public source repository for the full 5archive app: the frontend
 (`webui/`, a vendored fork of the engine's web UI) plus deploy config, the
 board list, and deploy docs. The API/crawler is the open
 [`bitsocial-indexer`](https://github.com/bitsocialnet/bitsocial-indexer) engine
-(GPL-3.0-or-later) — that part is **not** forked; Docker builds it directly
-from the public repo.
+(GPL-3.0-or-later) — that part is **not** forked; Docker pulls its published
+image, pinned to a release tag.
 
 ## Open source, centralized service
 
@@ -66,10 +66,11 @@ Two deployments:
 | Path | Purpose |
 |------|---------|
 | `webui/` | The 5archive frontend — vendored fork of the engine's `webui/` (see `webui/README.md` for provenance) |
-| `docker-compose.yml` | Builds the engine's `server` from GitHub, 5archive config via env |
+| `docker-compose.yml` | Runs the engine's `server` from a pinned GHCR image, 5archive config via env |
 | `config/communities.json` | The 5chan boards to index (generated, don't hand-edit) |
 | `webui/lib/directories.json` | Directory code → boards + title, the web UI's URL map (generated, don't hand-edit) |
 | `config/blocklist.json` | Takedown blocklist — CIDs redacted from the archive (see below) |
+| `config/nsfw-overrides.json` | Operator NSFW overrides — per-board verdicts that outrank every other NSFW signal (see `DEPLOY.md`) |
 | `scripts/build-communities.mjs` | Regenerates both generated files from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
 | `.env.example` | Documents every env var; real `.env` lives only on the VPS |
 | `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
@@ -186,8 +187,9 @@ See **[DEPLOY.md](DEPLOY.md)** for the complete runbook. The short version:
 # Generate the 5chan board list and the directory-code URL map
 node scripts/build-communities.mjs      # config/communities.json + webui/lib/directories.json
 
-# VPS (api.5archive.org): scp this repo to /opt/5archive, create .env, then
-docker compose up -d --build
+# VPS (api.5archive.org): scp docker-compose.yml and config/ to /opt/5archive,
+# create .env, then pull the pinned engine image and start it
+docker compose pull && docker compose up -d
 
 # Web UI (5archive.org): deploy this repo's webui/ to Vercel
 cd webui && vercel deploy --prod --yes
@@ -200,8 +202,10 @@ cd webui && vercel deploy --prod --yes
   `docker compose restart server`. The same run updates
   `webui/lib/directories.json` — commit it and redeploy the web UI so new or
   rotated directory codes resolve.
-- **Update the engine (API/crawler):** `docker compose build --no-cache &&
-  docker compose up -d` (rebuilds from the latest `bitsocial-indexer` master).
+- **Update the engine (API/crawler):** bump the `image:` tag in
+  `docker-compose.yml` to the `bitsocial-indexer` release you want, scp the
+  file to the VPS, then `docker compose pull && docker compose up -d`. The tag
+  is pinned, so nothing moves until you change it.
 - **Update the web UI:** edit `webui/` in this repo, then
   `vercel deploy --prod` from `webui/`. Upstream engine-webui improvements are
   ported into `webui/` manually.

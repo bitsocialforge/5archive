@@ -1,8 +1,11 @@
 # 5archive — 5chan archiver API + crawler (a Bitsocial Forge product).
 #
-# Runs only the `server` half of the public `bitsocial-indexer` engine, built
-# straight from GitHub — no engine code lives in this repo. The web UI is a
-# separate Vercel deployment of the engine's `webui/` (see DEPLOY.md).
+# Runs only the `server` half of the public `bitsocial-indexer` engine, pulled
+# as a pinned image from GHCR — no engine code lives in this repo and nothing
+# is built here. To upgrade, bump the `image:` tag below to the engine release
+# you want, then `docker compose pull && docker compose up -d` (see DEPLOY.md).
+# The web UI is a separate Vercel deployment of the engine's `webui/` (see
+# DEPLOY.md).
 #
 # Networking: the container shares the host's network so the crawler can reach
 # the 5chan bitsocial-cli daemon on ws://localhost:9138 (the daemon binds to
@@ -10,9 +13,9 @@
 # host's Caddy terminates TLS for api.5archive.org and proxies to :4000.
 services:
   server:
-    build:
-      # The engine's default branch is `master` (it has no `main`).
-      context: https://github.com/bitsocialnet/bitsocial-indexer.git#master:server
+    # Pinned engine release, published by the engine's own CI
+    # (.github/workflows/docker.yml). The package is public — no registry login.
+    image: ghcr.io/bitsocialnet/bitsocial-indexer:v0.4.0
     network_mode: host
     environment:
       # Bind: loopback only; Caddy is the public face.
@@ -32,6 +35,11 @@ services:
       # Takedown blocklist (see README "Takedowns / content policy"). The engine
       # watches this file — edits apply within ~a minute, no restart needed.
       BLOCKLIST_SOURCE: /config/blocklist.json
+      # Directory SFW verdicts by directory code (5chan's directories-defaults
+      # list), and the operator overrides that correct them. The engine watches
+      # the overrides file like the blocklist — no restart needed.
+      DIRECTORY_DEFAULTS_SOURCE: ${DIRECTORY_DEFAULTS_SOURCE:-}
+      NSFW_OVERRIDES_SOURCE: ${NSFW_OVERRIDES_SOURCE:-}
       DB_PATH: /data/5archive.db
       # Keep every board close to live. The engine enforces a bounded worker
       # pool, skips overlapping scheduler passes, and resets timed-out RPC work.

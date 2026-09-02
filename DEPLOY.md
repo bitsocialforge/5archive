@@ -12,8 +12,10 @@ Prereqs: SSH access to `root@91.234.199.189`, Cloudflare access for the
 ## 1. VPS — API + crawler (api.5archive.org)
 
 The production checkout uses `scp` for its small operational surface; no
-GitHub credential is required. The indexer engine is built directly from its
-public GitHub repository by Docker.
+GitHub credential is required. The indexer engine is pulled as a public image
+from GHCR (`ghcr.io/bitsocialnet/bitsocial-indexer`), pinned to a release tag
+in `docker-compose.yml` — the VPS never clones or builds the engine, and no
+registry login is needed.
 
 ```bash
 # From this repo on your machine:
@@ -30,6 +32,8 @@ cat > /opt/5archive/.env <<'EOF'
 PKC_RPC_URL=ws://localhost:9138
 SITE_URL=https://5archive.org
 ALLOWED_ORIGINS=https://5archive.org,https://5chan.app,https://5chan.localhost
+DIRECTORY_DEFAULTS_SOURCE=https://raw.githubusercontent.com/bitsocialnet/lists/master/5chan-directories/5chan-directories-defaults.json
+NSFW_OVERRIDES_SOURCE=/config/nsfw-overrides.json
 CRAWL_INTERVAL_MS=5000
 CRAWL_CONCURRENCY=8
 CRAWL_TIMEOUT_MS=30000
@@ -42,11 +46,21 @@ Because 5archive runs with host networking, `localhost` reaches the daemon as
 a local connection. Do **not** copy the daemon's remote auth key into this env
 file: it is unnecessary and dependency logs must never receive it.
 
-Build and start:
+The two `*_SOURCE` values feed the engine's NSFW resolution. It decides per
+board, highest precedence first: the operator override in
+`config/nsfw-overrides.json` → the board's own `features.safeForWork` → its
+5chan directory's verdict (`DIRECTORY_DEFAULTS_SOURCE`, the directories-defaults
+list keyed by directory code) → inference from flagged content. The overrides
+file is a JSON array (`[]` when empty) of bare addresses or
+`{ "address": "…", "nsfw": false, "reason": "…" }` objects; the engine watches
+it like the blocklist, so a copied file applies within about a minute with no
+restart.
+
+Pull the pinned engine image and start:
 
 ```bash
 cd /opt/5archive
-docker compose up -d --build
+docker compose pull && docker compose up -d
 ```
 
 Verify:
@@ -72,7 +86,14 @@ Notes:
 - The container uses **host networking** (`network_mode: host`) so
   `ws://localhost:9138` reaches the daemon on the host's loopback; the API
   itself binds `127.0.0.1:4000` only (`HOST=127.0.0.1`).
-- The engine builds from its **`master`** branch (it has no `main`).
+- The engine is whatever `image:` tag `docker-compose.yml` pins; nothing is
+  built on the VPS. `docker compose images` shows the tag actually running.
+  Upgrades are in §5.
+- `config/` is bind-mounted read-only into the container and is **not** part of
+  the image: an image upgrade never changes it, and a changed config file must
+  be `scp`'d to `/opt/5archive/config/` on its own. `communities.json` needs
+  `docker compose restart server` afterwards; the blocklist and NSFW overrides
+  are picked up live.
 - SQLite data persists in the `5archive_data` Docker volume.
 
 ## 2. Caddy vhost (on the same VPS)
@@ -161,10 +182,15 @@ respond, and browser calls to `https://api.5archive.org` pass CORS.
 
 ## 5. Updates
 
+`config/` is a bind mount, not part of the image: an image upgrade never ships a
+config change, and a config change never needs an image pull — copy the file
+and, where noted, restart.
+
 | What changed | Do |
 |--------------|----|
 | Board list (5chan directories) | `node scripts/build-communities.mjs`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'`. The same run rewrites `webui/lib/directories.json` (the directory-code URL map) — commit it and redeploy the web UI |
 | Takedown blocklist | Edit `config/blocklist.json` (see README), then `scp config/blocklist.json root@91.234.199.189:/opt/5archive/config/` — the engine watches the file and applies it within ~a minute, **no restart** |
-| Engine (server) | On the VPS: `cd /opt/5archive && docker compose build --no-cache && docker compose up -d` |
+| NSFW overrides | Edit `config/nsfw-overrides.json` (JSON array, `[]` when empty), then `scp config/nsfw-overrides.json root@91.234.199.189:/opt/5archive/config/` — watched like the blocklist, **no restart** |
+| Engine (server) | Bump the `image:` tag in `docker-compose.yml` to the [release](https://github.com/bitsocialnet/bitsocial-indexer/tags) you want and commit, `scp docker-compose.yml root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose pull && docker compose up -d'`. `docker compose images` confirms the running tag. The image is public — no `docker login` on the VPS |
 | Web UI | Edit `webui/` in this repo and push `master` for the normal Git-triggered production deployment. For a manual fallback, run `vercel deploy --prod` from `webui/`. Engine-webui upstream improvements are ported into `webui/` manually — there is no automatic sync. |
 | This repo's compose/env conventions | `scp docker-compose.yml` to `/opt/5archive/` and `docker compose up -d` |

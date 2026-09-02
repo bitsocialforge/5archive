@@ -17,3 +17,13 @@ npm run typecheck
 npm run build
 npm run dev
 ```
+
+## Upstream ports
+
+Upstream `webui/` changes carried into this fork since v0.2.0, by upstream
+commit (`git show <sha> -- webui/` in the engine repo shows the original diff).
+
+| Upstream | Ported | Change |
+|----------|--------|--------|
+| `6a29818` | 2026-07-26 | next `^16.2.11` and pinned patched transitive deps (`package.json`, `package-lock.json`). |
+| `3b404ad` | 2026-09-02 | `SHOW_NSFW` site-config var (`lib/site.ts`, default `false`) and `search()` always sending `nsfw=` explicitly (`lib/api.ts`), so an instance opts into NSFW results instead of silently inheriting the API's exclude-by-default. |

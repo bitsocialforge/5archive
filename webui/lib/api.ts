@@ -1,3 +1,4 @@
+import { showNsfw } from './site';
 import type { Community, Health, PostPage, SearchResult, Thread } from './types';
 
 const BASE = process.env.INDEXER_API ?? 'http://localhost:4000';
@@ -28,4 +29,8 @@ export const getCommunity = (address: string, revalidate = 5) =>
   get<Community>(`/api/communities/${encodeURIComponent(address)}`, revalidate);
 export const getPosts = (query = '', revalidate = 5) => get<PostPage>(`/api/posts${query}`, revalidate);
 export const getThread = (cid: string, revalidate = 5) => get<Thread>(`/api/posts/${encodeURIComponent(cid)}`, revalidate);
-export const search = (q: string) => get<SearchResult>(`/api/search?q=${encodeURIComponent(q)}`);
+// `nsfw` is always sent: the API excludes NSFW when the parameter is absent, so
+// leaving it off would make every instance inherit that default silently. See
+// SHOW_NSFW in lib/site.ts.
+export const search = (q: string) =>
+  get<SearchResult>(`/api/search?q=${encodeURIComponent(q)}&nsfw=${showNsfw}`);

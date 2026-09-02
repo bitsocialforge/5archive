@@ -30,6 +30,14 @@ export const brandUrl = process.env.BRAND_URL ?? '';
 export const contactEmail = process.env.CONTACT_EMAIL ?? '';
 
 /**
+ * Whether this instance's search returns NSFW results. `false` (the default)
+ * matches the API's own safe default; an archive of boards that are NSFW by
+ * design sets SHOW_NSFW=true. The UI always sends the value explicitly, so a
+ * deployment decides this rather than inheriting whatever the API defaults to.
+ */
+export const showNsfw = process.env.SHOW_NSFW === 'true';
+
+/**
  * The live network this instance archives (5archive → 5chan). Both must be set
  * for any of the upstream links to render, so a plain indexer stays neutral and
  * never advertises somebody else's app. See lib/upstream.ts for the link rules.

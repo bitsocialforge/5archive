@@ -137,6 +137,7 @@ webui reads** (`webui/lib/api.ts`, `webui/lib/site.ts`):
 | `BRAND_TEXT` | `A Bitsocial Forge product` | Footer attribution line |
 | `BRAND_URL` | `https://bitsocialforge.com` | Footer attribution link |
 | `CONTACT_EMAIL` | `abuse@5archive.org` | Takedown/abuse contact on the `/legal` page (content policy + takedown instructions, linked from the footer). |
+| `SHOW_NSFW` | `true` | Search includes NSFW results. The UI sends this on every query; unset (= `false`, the code default) inherits the API's safe default and hides the boards that are NSFW by design (`/b/`, `/pol/`, `/wg/`…), which on an imageboard archive is a regression, not a safeguard. |
 | `UPSTREAM_NAME` | `5chan` | The live network this archive mirrors. Both `UPSTREAM_*` vars must be set or no links back to 5chan render at all. |
 | `UPSTREAM_URL` | `https://5chan.app` | Origin used to build those links (`#/<board>/thread/<cid>`). |
 

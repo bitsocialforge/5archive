@@ -51,8 +51,8 @@ services:
       # call the API from a browser. Keep both 5chan origins here, and never set
       # this to `*`: the engine already falls back to `*` when this is unset, so
       # an open API is the failure mode of a missing value, not an opt-in.
-      # ALLOWED_ORIGINS is the engine's new env name; CORS_ORIGIN is the one the
-      # current tip reads — set both so this works across engine versions.
+      # ALLOWED_ORIGINS is the engine's new env name; CORS_ORIGIN is the legacy
+      # name it still honours — set both so this works across engine versions.
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://5archive.org,https://5chan.app,https://5chan.localhost}
       CORS_ORIGIN: ${ALLOWED_ORIGINS:-https://5archive.org,https://5chan.app,https://5chan.localhost}
     volumes:

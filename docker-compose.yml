@@ -15,7 +15,7 @@ services:
   server:
     # Pinned engine release, published by the engine's own CI
     # (.github/workflows/docker.yml). The package is public — no registry login.
-    image: ghcr.io/bitsocialnet/bitsocial-indexer:v0.4.1
+    image: ghcr.io/bitsocialnet/bitsocial-indexer:v0.4.2
     network_mode: host
     environment:
       # Bind: loopback only; Caddy is the public face.

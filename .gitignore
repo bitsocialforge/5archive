@@ -20,3 +20,9 @@ data/
 !.yarn/releases
 !.yarn/versions
 .pnp.*
+
+# Local React profiling builds and evidence
+.next-perf/
+.next-perf-dev/
+.react-perf/
+.playwright-cli/

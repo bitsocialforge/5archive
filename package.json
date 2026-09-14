@@ -14,7 +14,15 @@
     "type-check": "npm --prefix webui run typecheck",
     "webui:install": "node scripts/install-webui.mjs --force",
     "communities:build": "node scripts/build-communities.mjs",
-    "postinstall": "node scripts/install-webui.mjs"
+    "postinstall": "node scripts/install-webui.mjs",
+    "agent:verify": "npm --prefix webui run agent:verify",
+    "doctor:check": "npm --prefix webui run doctor:check --",
+    "perf:install": "npm --prefix webui run perf:install --",
+    "perf:test": "npm --prefix webui run perf:test --",
+    "perf:check": "npm --prefix webui run perf:check --",
+    "perf:record": "npm --prefix webui run perf:record --",
+    "build:profile": "npm --prefix webui run build:profile",
+    "start:profile": "npm --prefix webui run start:profile --"
   },
   "optionalDependencies": {
     "portless": "0.11.1"

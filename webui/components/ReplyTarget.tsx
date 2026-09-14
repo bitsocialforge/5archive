@@ -12,3 +12,8 @@ export function ReplyTarget({ cid }: { cid?: string }) {
 
   return null;
 }
+
+// Keep the scenario's component identity stable in minified profiling builds.
+if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_REACT_PERF === '1') {
+  ReplyTarget.displayName = 'ReplyTarget';
+}

@@ -60,14 +60,47 @@ export function getLocalServerCommand() {
   return usePortless && existsSync(portlessBin) ? portlessBin : nextBin;
 }
 
+function readJson(file) {
+  try {
+    return JSON.parse(readFileSync(file, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * npm records what it actually installed in node_modules/.package-lock.json.
+ * Compare it with the committed lockfile so pulling a dependency change
+ * reinstalls instead of serving a stale tree (e.g. a newly added package that
+ * fails with "Module not found"). Optional packages may be skipped per platform.
+ */
+function webuiDependenciesMatchLockfile() {
+  const locked = readJson(join(webuiDir, 'package-lock.json'))?.packages;
+
+  if (!locked) {
+    return true;
+  }
+
+  const installed = readJson(join(webuiDir, 'node_modules', '.package-lock.json'))?.packages;
+
+  if (!installed) {
+    return false;
+  }
+
+  return Object.entries(locked).every(
+    ([path, pkg]) => !path || pkg.optional || installed[path]?.version === pkg.version,
+  );
+}
+
 /**
  * The web UI keeps its own npm lockfile (Vercel deploys `webui/` as the project
  * root), so the root yarn project never owns its dependencies. Install them on
- * demand instead of failing with a missing `next` binary. `npm ci` is used when
- * a lockfile is present so the pinned tree is reproduced and never rewritten.
+ * demand instead of failing with a missing `next` binary or a stale tree.
+ * `npm ci` is used when a lockfile is present so the pinned tree is reproduced
+ * and never rewritten.
  */
 export function ensureWebuiDependencies({ force = false } = {}) {
-  if (!force && existsSync(nextBin)) {
+  if (!force && existsSync(nextBin) && webuiDependenciesMatchLockfile()) {
     return;
   }
 

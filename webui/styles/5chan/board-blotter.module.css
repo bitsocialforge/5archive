@@ -1,0 +1,64 @@
+/* Copied verbatim from 5chan src/components/board-blotter/board-blotter.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.hide {
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.content hr {
+  min-width: 468px;
+  margin-left: -4px;
+  margin-bottom: 6px;
+}
+
+.blotter {
+  min-width: 468px;
+  margin: auto;
+  line-height: 1;
+  margin-top: -1px;
+}
+
+.blotter tr {
+  font-size: var(--stats-font-size);
+}
+
+.blotter tfoot {
+  text-align: right;
+}
+
+.hideButton,
+.actionLink {
+  color: var(--button-desktop-text-color);
+  text-decoration: var(--button-text-decoration);
+  text-transform: capitalize;
+}
+
+.hideButton {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  display: inline;
+  font: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.hideButton:focus-visible {
+  outline: 1px dotted currentcolor;
+  outline-offset: 1px;
+}
+
+.hideButton:hover,
+.actionLink:hover {
+  cursor: pointer;
+  color: var(--button-desktop-text-color-hover);
+}
+
+@media (max-width: 640px) {
+  .content {
+    display: none;
+  }
+}

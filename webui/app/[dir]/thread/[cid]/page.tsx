@@ -1,21 +1,25 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
+import { BoardHeader } from '@/components/chan/BoardHeader';
+import { BoardsBar } from '@/components/chan/BoardsBar';
+import { BoardButtons, Bracket, PageFooter } from '@/components/chan/Chrome';
+import footerStyles from '@/styles/5chan/footer.module.css';
+import { Thread } from '@/components/chan/Post';
+import { QuotePreviews } from '@/components/chan/QuotePreviews';
+import { ThemeRoot } from '@/components/chan/ThemeRoot';
 import { JsonLd } from '@/components/JsonLd';
-import { Prose } from '@/components/Prose';
-import { ReplyTarget } from '@/components/ReplyTarget';
-import { isTombstone, Tombstone } from '@/components/Tombstone';
-import {
-  UpstreamPostLink,
-  UpstreamProvenance,
-  UpstreamThreadCta,
-  UpstreamThreadNote,
-} from '@/components/Upstream';
-import { getThread } from '@/lib/api';
-import { boardPath, replyAnchor, segmentForAddress, threadPath } from '@/lib/directories';
+import { AnchorScroll, ReplyTarget } from '@/components/ReplyTarget';
+import { isTombstone } from '@/components/Tombstone';
+import { UpstreamProvenance, UpstreamThreadEnd, UpstreamThreadForm } from '@/components/Upstream';
+import { getCommunity, getThread } from '@/lib/api';
+import { archivedBoards, boardPath, directoryForAddress, segmentForAddress, threadPath } from '@/lib/directories';
+import { excerpt } from '@/lib/format';
 import { threadGraph } from '@/lib/jsonld';
-import { excerpt, timeAgo } from '@/lib/format';
-import type { Comment, Thread } from '@/lib/types';
+import { embeddedNumbers, postView } from '@/lib/post';
+import { boardTheme } from '@/lib/theme';
+import { threadLinks } from '@/lib/thread';
+import type { Comment, Thread as ThreadData } from '@/lib/types';
 
 // Threads are archived content: cache the page, revalidate for late replies.
 export const revalidate = 5;
@@ -33,7 +37,7 @@ function threadTitle(post: Comment): string {
  * reply cid in the URL while rendering its root thread and targeting the reply.
  * A cid reached under the wrong directory segment redirects to its own board.
  */
-async function loadThread(cid: string): Promise<{ requestedPost: Comment; targetReplyCid?: string; thread: Thread } | null> {
+async function loadThread(cid: string): Promise<{ requestedPost: Comment; targetReplyCid?: string; thread: ThreadData } | null> {
   const requestedThread = await getThread(cid);
   if (!requestedThread) return null;
 
@@ -64,7 +68,7 @@ async function resolveThread(segment: string, cid: string) {
  * nobody. Keyed to the root post, never the requested one — a permalink to a
  * single removed reply otherwise hides the entire intact thread.
  */
-const isIndexable = (thread: Thread) => !isTombstone(thread.post);
+const isIndexable = (thread: ThreadData) => !isTombstone(thread.post);
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { cid } = await params;
@@ -97,74 +101,135 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   };
 }
 
+/** 5chan's PostPageStats: "Archived / 12 / 3" — replies, then replies with links. */
+function Stats({ archived, replies, links }: { archived: boolean; replies: number; links: number }) {
+  return (
+    <span>
+      {archived ? 'Archived / ' : null}
+      <span title="Replies">{replies}</span> / <span title="Links">{links}</span>
+    </span>
+  );
+}
+
 export default async function ThreadPage({ params }: Params) {
   const { dir, cid } = await params;
   const { targetReplyCid, thread } = await resolveThread(decodeURIComponent(dir), decodeURIComponent(cid));
   const { post, replies } = thread;
   const code = segmentForAddress(post.community_address);
+  const directory = directoryForAddress(post.community_address);
   const headline = threadTitle(post);
   // No markup on a noindexed page: it can't produce a rich result and only
   // shows up in Search Console as invalid items.
   const graph = isIndexable(thread) ? threadGraph(thread, headline, code) : null;
 
+  const community = await getCommunity(post.community_address);
+  const op = postView(post);
+  const numbers = embeddedNumbers(post);
+  const views = replies.map((reply) => postView(reply, numbers));
+  const links = threadLinks(op, views, new Set([post.cid, ...replies.map((r) => r.cid)]));
+  const linkCount = views.filter((v) => v.media).length;
+  const board = boardPath(post.community_address);
+  const archived = post.archived === 1;
+
+  const navLeft = (
+    <>
+      <Bracket href={board}>Return</Bracket> <Bracket href={`${board}/catalog`}>Catalog</Bracket>{' '}
+    </>
+  );
+
   return (
-    <article>
+    <ThemeRoot theme={boardTheme([community])}>
       {graph ? <JsonLd graph={graph} /> : null}
       <ReplyTarget cid={targetReplyCid} />
-      <div className="results-head thread-head">
-        <Link href={boardPath(post.community_address)} className="chip">
-          /{code}/
-        </Link>{' '}
-        {post.archived ? (
-          <span className="flag flag-archived" title="No longer live upstream — preserved by this archive">
-            Archived
-          </span>
-        ) : null}
-        <UpstreamThreadNote post={post} code={code} />
-      </div>
-
-      <div className="card thread-op">
-        <h1>{headline}</h1>
-        <div className="meta">
-          <span>{post.author_name ?? 'anon'}</span>
-          <span>·</span>
-          <time dateTime={new Date(post.timestamp * 1000).toISOString()}>{timeAgo(post.timestamp)}</time>
-        </div>
-        {post.link ? (
-          <p className="meta">
-            <a className="chip" href={post.link} target="_blank" rel="noopener noreferrer nofollow">
-              {post.link}
-            </a>
-          </p>
-        ) : null}
-        {isTombstone(post) ? <Tombstone comment={post} /> : post.content ? <Prose text={post.content} /> : null}
-        <UpstreamProvenance post={post} />
-      </div>
-
-      <h2 className="section-title">
-        {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
-      </h2>
-      {replies.map((r) => (
-        <div
-          className={`reply${r.cid === targetReplyCid ? ' reply-target' : ''}${isTombstone(r) ? ' reply-tombstone' : ''}`}
-          key={r.cid}
-          id={replyAnchor(r.cid)}
-        >
-          <div className="meta">
-            <span>{r.author_name ?? 'anon'}</span>
-            <span>·</span>
-            <time dateTime={new Date(r.timestamp * 1000).toISOString()}>{timeAgo(r.timestamp)}</time>
-            <span>·</span>
-            <Link className="permalink" href={threadPath(r)} title={r.cid}>
-              No.{r.cid.slice(-8)}
+      <AnchorScroll />
+      <QuotePreviews />
+      <span id="top" />
+      <BoardsBar current={code} />
+      <BoardHeader
+        title={headline}
+        subtitle={
+          <>
+            <Link href={board}>{directory?.title ?? `/${code}/`}</Link> ·{' '}
+            {/* In a code shared by several boards, the address opens that board's own page. */}
+            {directory && archivedBoards(directory).length > 1 ? (
+              <Link href={`/${encodeURIComponent(post.community_address)}`}>{post.community_address}</Link>
+            ) : (
+              post.community_address
+            )}
+          </>
+        }
+      />
+      <UpstreamThreadForm post={post} code={code} />
+      <BoardButtons
+        left={
+          <>
+            {navLeft}
+            <Bracket href="#bottom">Bottom</Bracket>
+          </>
+        }
+        right={<Stats archived={archived} replies={replies.length} links={linkCount} />}
+        mobile={
+          <>
+            <Link className="button" href={board}>
+              Return
+            </Link>{' '}
+            <Link className="button" href={`${board}/catalog`}>
+              Catalog
+            </Link>{' '}
+            <Link className="button" href="#bottom">
+              Bottom
             </Link>
-            {r.cid === targetReplyCid ? <UpstreamPostLink post={r} /> : null}
+          </>
+        }
+      />
+      <Thread
+        op={op}
+        replies={views}
+        links={links}
+        mode="thread"
+        totalReplies={replies.length}
+        totalLinks={linkCount}
+        targetCid={targetReplyCid}
+        opFooter={<UpstreamProvenance post={post} />}
+      />
+      <span id="bottom" />
+      <PageFooter
+        firstRow={
+          <div className={footerStyles.threadRow}>
+            <div className={footerStyles.threadLeft}>
+              {navLeft}
+              <Bracket href="#top">Top</Bracket>
+            </div>
+            <div className={footerStyles.threadCenter}>
+              <UpstreamThreadEnd post={post} code={code} />
+            </div>
+            <div className={footerStyles.threadRight}>
+              <Stats archived={archived} replies={replies.length} links={linkCount} />
+            </div>
           </div>
-          {isTombstone(r) ? <Tombstone comment={r} /> : <Prose text={r.content ?? ''} />}
-        </div>
-      ))}
-
-      <UpstreamThreadCta post={post} code={code} />
-    </article>
+        }
+        mobile={
+          <div className={footerStyles.threadMobileFooterContent}>
+            <div className={footerStyles.mobileFooterButtons}>
+              <UpstreamThreadEnd post={post} code={code} mobile />
+            </div>
+            <div className={footerStyles.mobileFooterButtons}>
+              <Link className="button" href={board}>
+                Return
+              </Link>{' '}
+              <Link className="button" href={`${board}/catalog`}>
+                Catalog
+              </Link>{' '}
+              <Link className="button" href="#top">
+                Top
+              </Link>
+            </div>
+            <div className={footerStyles.mobileFooterStats}>
+              Replies: {replies.length} / Links: {linkCount}
+            </div>
+          </div>
+        }
+      />
+    </ThemeRoot>
   );
 }

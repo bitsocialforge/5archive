@@ -34,3 +34,10 @@ export function excerpt(text: string | null | undefined, max = 160): string {
   const flat = text.replace(/\s+/g, ' ').trim();
   return flat.length <= max ? flat : `${flat.slice(0, max - 1).trimEnd()}…`;
 }
+
+/** 5chan's blotter date, "09/19/26", in UTC like every date the server renders. */
+export function formatShortDate(sec: number): string {
+  const d = new Date(sec * 1000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getUTCMonth() + 1)}/${pad(d.getUTCDate())}/${pad(d.getUTCFullYear() % 100)}`;
+}

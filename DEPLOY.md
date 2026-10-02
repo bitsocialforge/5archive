@@ -151,10 +151,9 @@ webui reads** (`webui/lib/api.ts`, `webui/lib/site.ts`):
 | Var | Value | Meaning |
 |-----|-------|---------|
 | `INDEXER_API` | `https://api.5archive.org` | API base URL (SSR fetches) |
-| `SITE_NAME` | `5archive` | Site name in header/titles |
+| `SITE_NAME` | `5archive` | Site name in titles and footer |
 | `SITE_BADGE` | *(empty string)* | No badge — title is just "5archive" |
 | `SITE_URL` | `https://5archive.org` | Canonicals, OpenGraph, robots, sitemaps |
-| `THEME` | `5chan` | Classic imageboard (yotsuba) skin |
 | `BRAND_TEXT` | `A Bitsocial Forge product` | Footer attribution line |
 | `BRAND_URL` | `https://bitsocialforge.com` | Footer attribution link |
 | `CONTACT_EMAIL` | `abuse@5archive.org` | Takedown/abuse contact on the `/legal` page (content policy + takedown instructions, linked from the footer). |

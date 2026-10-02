@@ -1,0 +1,98 @@
+/* Copied verbatim from 5chan src/components/board-header/board-header.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.content {
+  text-align: center;
+  clear: both;
+}
+
+.bannerCnt img {
+  width: 300px;
+  height: 100px;
+  border: var(--banner-image-border);
+  max-width: 100%;
+}
+
+.boardTitle {
+  font-family: var(--board-title-font-family);
+  font-size: var(--board-title-font-size);
+  font-weight: 700;
+  letter-spacing: -2px;
+  margin-top: 0;
+  color: var(--board-title-text-color);
+}
+
+.boardSubtitle {
+  font-size: var(--board-address-font-size);
+  color: var(--board-address-text-color);
+}
+
+.clickableSubtitle {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-block;
+  font: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.clickableSubtitle:hover {
+  text-decoration: underline;
+}
+
+.clickableSubtitle:focus-visible {
+  outline: 1px dotted currentcolor;
+  outline-offset: 1px;
+}
+
+.content hr {
+  width: 90%;
+}
+
+.offlineIconWrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+  line-height: 1;
+}
+
+.offlineIcon {
+  width: 16px;
+  height: 16px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  image-rendering: pixelated;
+  display: inline-block;
+}
+
+.redOfflineIcon {
+  background-image: var(--offline-icon);
+}
+
+.yellowOfflineIcon {
+  background-image: var(--offline-loading-icon);
+}
+
+@media (max-width: 640px) {
+  .content {
+    margin-top: 40px;
+  }
+ }
+
+ @media (min-width: 640px) {
+  .bannerCnt {
+    padding: 5px 0 2px 0;
+  }
+ }
+
+ .garland {
+  border-image-slice: 50 0 50 0;
+  border-image-width: 40px 0px 0px 0px;
+  border-image-outset: 0px 0px 0px 0px;
+  border-image-repeat: repeat repeat;
+  border-image-source: url('/assets/garland.png');
+  border-style: solid;
+  padding-top: 50px;
+ }

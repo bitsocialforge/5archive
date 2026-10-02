@@ -1,0 +1,395 @@
+/* Copied verbatim from 5chan src/views/home/home.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.content {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  text-align: left;
+  width: 748px;
+  min-width: 748px;
+}
+
+:global([data-frames-enabled]) .content {
+  box-sizing: border-box;
+  width: min(748px, 100%);
+  min-width: 0;
+}
+
+.box {
+  position: relative;
+  background: var(--homepage-box-background-color);
+  color: var(--homepage-infobox-text-color);
+  border: 1px solid var(--homepage-box-border-color);
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.infoBox {
+  border: 1px solid black;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.boxBar,
+.infoboxBar {
+  padding-left: 0.5em;
+  line-height: 2em;
+  text-transform: capitalize;
+}
+
+.infoboxBar {
+  position: relative;
+  background: var(--homepage-infobox-bar-background-color);
+  color: var(--homepage-infobox-bar-text-color);
+}
+
+.closeInfoBox {
+  all: unset;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: #800 url('/assets/buttons/icon-close-red.png');
+  cursor: pointer;
+}
+
+.closeInfoBox:focus-visible {
+  outline: 1px solid var(--homepage-infobox-bar-text-color);
+  outline-offset: 1px;
+}
+
+.infoboxBar h2 {
+  padding-right: 24px;
+}
+
+.boxBar {
+  background: var(--homepage-box-bar-background-color);
+  color: var(--homepage-box-bar-text-color);
+}
+
+.boxBar h2,
+.infoboxBar h2 {
+  font-size: 131%;
+  font-weight: 700;
+}
+
+.boxBar > span,
+.boxBar > button {
+  all: unset;
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding-right: 0.25em;
+  text-transform: lowercase;
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+
+.boxBar > span:hover,
+.boxBar > button:hover {
+  cursor: pointer;
+  color: var(--homepage-box-bar-text-color-hover);
+}
+
+.boxContent {
+  line-height: 1.5em;
+  font-size: 93%;
+  padding: 0.5em;
+  padding-top: 0.25em;
+  padding-bottom: 0;
+}
+
+.boxContent a {
+  text-decoration: underline;
+}
+
+.boxContent a,
+.boxContent a:visited {
+  color: var(--homepage-infobox-link-text-color);
+}
+
+.searchBar form {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.searchBar input {
+  font-size: 18px;
+  height: 30px;
+  box-sizing: border-box;
+  appearance: none;
+  border-radius: 0px;
+  border: 1px solid rgb(170, 170, 170);
+  outline: none;
+  flex-grow: 1;
+  min-width: 0;
+  max-width: 400px;
+}
+
+.searchBar input {
+  width: 400px;
+  padding: 3px 10px;
+}
+
+.searchBar input:focus {
+  border-color: #ea8;
+}
+
+.searchButton {
+  margin-left: 4px;
+  padding: 3px 5px;
+  display: inline-block;
+  text-transform: capitalize;
+  font-size: 14px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.filterModal {
+  position: absolute;
+  top: 30px;
+  right: 5px;
+  display: inline-block;
+  text-align: right;
+  background: #fff;
+  border: 1px solid gray;
+  box-shadow: 2px 2px 0 1px rgba(0, 0, 0, 0.1);
+  padding: 4px 0;
+  line-height: 1.7em;
+  min-width: max-content;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.filterModal .separator {
+  border-bottom: 1px solid #ccc;
+  margin: 6px 0 4px;
+  padding: 0;
+}
+
+.filterModal .option {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  min-width: 100%;
+  padding: 0 10px;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.filterModal .option:hover {
+  background-color: #fca;
+  cursor: pointer;
+}
+
+.boxBar > button:focus-visible,
+.filterModal .option:focus-visible {
+  outline: 1px solid currentcolor;
+  outline-offset: -1px;
+}
+
+.filterModal .selected::before {
+  content: '✓ ';
+}
+
+.popularThreads {
+  font-size: 93%;
+  padding: 0.5em;
+  padding-top: 0.25em;
+  padding-bottom: 0;
+  line-height: 130%;
+  text-align: center;
+}
+
+.popularThreadsLoading {
+  text-align: left;
+  /* Reserve space only while loading: max 8 posts, ~2 rows of 4 cards on desktop */
+  min-height: 500px;
+}
+
+.popularThread {
+  vertical-align: top;
+  display: inline-block;
+  word-wrap: break-word;
+  overflow: hidden;
+  margin-top: 5px;
+  padding: 5px 0 3px;
+  position: relative;
+  width: 175px;
+  max-height: 320px;
+  margin-bottom: 10px;
+  color: #800;
+}
+
+.popularThread .title {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  white-space: nowrap;
+  margin-bottom: 5px;
+}
+
+.popularThread .mediaContainer {
+  width: auto;
+  height: auto;
+  border: 1px solid #800;
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  line-height: 0;
+}
+
+.popularThread .mediaContainer img,
+.popularThread .mediaContainer canvas,
+.popularThread .mediaContainer video {
+  max-width: 150px;
+  max-height: 150px;
+}
+
+.popularThread .threadContent {
+  margin-bottom: 5px;
+  padding: 0 2px;
+  white-space: pre-line;
+}
+
+.stats {
+  margin-top: 5px;
+  text-align: center;
+  color: #800;
+}
+
+.statsTitle {
+  padding-right: 6em;
+  text-transform: none;
+}
+
+.statsLoadingIconWrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.statsLoadingIconWrapper > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.statsLoadingIcon {
+  box-sizing: border-box;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+}
+
+.stats .stat {
+  display: inline-block;
+  width: 33%;
+  text-transform: capitalize;
+}
+
+.boardsContent {
+  display: block;
+  padding: 0.5em;
+  padding-top: 0.25em;
+  padding-bottom: 0;
+  line-height: 130%;
+}
+
+.boardsContent::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.boardsColumn {
+  display: block;
+  float: left;
+  width: 145px;
+}
+
+.boardsColumn h3:not(.nsfwBadge) {
+  display: inline;
+  font-weight: 700;
+  font-size: 100%;
+  margin: 0;
+  text-transform: capitalize;
+  color: #800;
+  text-decoration: underline;
+}
+
+.nsfwBadge {
+  display: inline;
+  color: #e00;
+  font-size: 100% !important;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: smaller;
+  vertical-align: baseline;
+}
+
+.nsfwBadge sup {
+  vertical-align: text-bottom;
+  font-size: smaller;
+}
+
+.boardsColumn ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.boardsColumn li {
+  margin: 0;
+  padding: 0;
+  line-height: 130%;
+}
+
+.boardsColumn a {
+  color: var(--homepage-box-link-text-color) !important;
+  text-decoration: none;
+}
+
+.boardsColumn a:hover {
+  color: var(--homepage-box-link-text-color-hover) !important;
+  text-decoration: underline;
+}
+
+.boardsColumn a.placeholder {
+  color: #aaa !important;
+}
+
+@media (max-width: 640px) {
+  .content {
+    min-width: 0;
+    width: auto;
+    padding: 10px;
+  }
+
+  .boardsColumn li {
+    padding: 5px 10px 5px 0;
+  }
+
+  .boardsColumn a {
+    font-size: 1.2em;
+  }
+
+  /* Mobile: popular threads cards stack more, so taller min-height needed */
+  .popularThreadsLoading {
+    min-height: 1200px;
+  }
+}

@@ -7,6 +7,8 @@ export interface Community {
   added_at: number;
   last_indexed_at: number | null;
   post_count: number;
+  /** Resolved NSFW flag (operator override > board declaration > directory list > inference). */
+  nsfw?: 0 | 1;
 }
 
 export interface Comment {
@@ -23,6 +25,12 @@ export interface Comment {
   link: string | null;
   thumbnail_url: string | null;
   reply_count: number;
+  /**
+   * The signed source comment and its CommentUpdate, as crawled (JSON). Null on
+   * tombstones. Read only through lib/post.ts: an OP's raw also embeds its
+   * preloaded reply pages, which the API does not redact.
+   */
+  raw?: string | null;
   indexed_at: number;
   /** 1 when the thread is no longer live upstream (served from the archive). */
   archived: 0 | 1;
@@ -34,6 +42,8 @@ export interface Comment {
   takedown: 0 | 1;
   /** Operator-side bookkeeping (e.g. "DMCA #42") — not shown in the UI. */
   takedown_reason: string | null;
+  /** The protocol's per-comment NSFW flag (author- or mod-set). */
+  nsfw?: 0 | 1;
 }
 
 export interface PostPage {

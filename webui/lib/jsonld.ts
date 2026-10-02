@@ -1,5 +1,6 @@
 import { isTombstone, tombstoneText } from '@/components/Tombstone';
 import { boardPath, replyAnchor, threadPath } from './directories';
+import { authorLabel } from './post';
 import { absUrl, siteName, siteUrl } from './site';
 import type { Comment, Thread } from './types';
 
@@ -97,8 +98,8 @@ const websiteId = `${siteUrl}/#website`;
 /** The same expression the rendered <time dateTime> uses. */
 const iso = (unixSeconds: number) => new Date(unixSeconds * 1000).toISOString();
 
-/** The byline the page prints, verbatim — not normalised to "Anonymous". */
-const author = (post: Comment): Person => ({ '@type': 'Person', name: post.author_name ?? 'anon' });
+/** The byline the page prints, verbatim (5chan's name block, see authorLabel). */
+const author = (post: Comment): Person => ({ '@type': 'Person', name: authorLabel(post) });
 
 const crumbs = (items: { name: string; path?: string }[]): Breadcrumb => ({
   '@type': 'BreadcrumbList',

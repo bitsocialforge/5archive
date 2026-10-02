@@ -9,9 +9,10 @@ const threadPath = archiveRoutes ? `/${communityAddress}/thread/${threadCid}` : 
 // The shared runner records each sample and fails missing collector/timing coverage.
 const navigationBudget = { maxCommits: 60, maxRenderMs: 250, maxActionMs: 10000 };
 
-async function expectPosts(page, count) {
-  await page.locator('.post-title').first().waitFor({ state: 'visible' });
-  assert.equal(await page.locator('.post-title').count(), count, 'Expected populated fixture results');
+// Threads render a desktop and a mobile copy (CSS shows one); data-* hooks mark one per post.
+async function expectPosts(page, count, selector = '[data-thread]') {
+  await page.locator(selector).first().waitFor({ state: 'attached' });
+  assert.equal(await page.locator(selector).count(), count, 'Expected populated fixture results');
   assert.equal(await page.getByText('The indexer API isn’t reachable.').count(), 0);
 }
 
@@ -34,26 +35,26 @@ export default {
         path: '/',
         prepare,
         async run({ page, measure, origin }) {
-          await expectPosts(page, 3);
+          await expectPosts(page, 3, '[data-popular-thread]');
           await measure('open-community', async () => {
-            await page.locator('.community-list a').click();
+            await page.locator(`a[href="${communityPath}"]`).first().click();
             await page.waitForURL(`${origin}${communityPath}`);
             await page.getByRole('heading', { name: communityTitle, exact: true }).waitFor();
             await expectPosts(page, 3);
           }, navigationBudget);
           await measure('open-thread', async () => {
-            await page.getByRole('link', { name: threadTitle, exact: true }).click();
+            await page.locator(`[data-thread="${threadCid}"] a`, { hasText: 'View Thread' }).first().click();
             await page.waitForURL(`${origin}${threadPath}`);
             await page.getByRole('heading', { name: threadTitle, exact: true }).waitFor();
-            await page.getByText('Fixture reply 2', { exact: true }).waitFor();
-            assert.equal(await page.locator('.reply').count(), 2);
+            await page.getByText('Fixture reply 2', { exact: true }).first().waitFor();
+            assert.equal(await page.locator('[data-reply]').count(), 2);
           }, navigationBudget);
           if (archiveRoutes) {
             await measure('open-reply-permalink', async () => {
-              await page.locator('.permalink').first().click();
+              await page.locator('[data-reply] [data-permalink]').first().click();
               await page.waitForURL(`${origin}/${communityAddress}/thread/perf-reply-001`);
-              await page.locator('#pperf-reply-001.reply-target').waitFor();
-              await page.getByText('Fixture reply 1', { exact: true }).waitFor();
+              await page.locator('#pperf-reply-001 .reply-target').waitFor();
+              await page.getByText('Fixture reply 1', { exact: true }).first().waitFor();
             }, { ...navigationBudget, components: { ReplyTarget: { minMounts: 1, maxMounts: 1, minUnmounts: 1, maxUnmounts: 1, maxUpdates: 0 } } });
           }
         },
@@ -63,16 +64,16 @@ export default {
         path: '/',
         prepare,
         async run({ page, measure, origin }) {
-          await expectPosts(page, 3);
+          await expectPosts(page, 3, '[data-popular-thread]');
           // This form is native HTML, not a stateful React input. Its submit navigates
           // to a new document; the report covers that document's client hydration.
-          await page.locator('.header-search input[name="q"]').fill('needle');
+          await page.locator('form[role="search"] input[name="q"]').fill('needle');
           await measure('submit-search', async () => {
-            await page.locator('.header-search button[type="submit"]').click();
+            await page.locator('form[role="search"] button[type="submit"]').click();
             await page.waitForURL(`${origin}/search?q=needle`);
-            await page.getByRole('heading', { name: 'Results for “needle”', exact: true }).waitFor();
+            await page.getByRole('heading', { name: /Search “needle”$/ }).waitFor();
             await expectPosts(page, 1);
-            await page.getByRole('link', { name: threadTitle, exact: true }).waitFor();
+            await page.locator(`[data-thread="${threadCid}"]`).waitFor({ state: 'attached' });
           }, navigationBudget, { navigation: true });
         },
       },

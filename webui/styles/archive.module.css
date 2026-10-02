@@ -1,0 +1,208 @@
+/*
+ * The few surfaces 5chan has no equivalent for. Same rules as 5chan's
+ * DESIGN.md: theme variables only, square, flat, compact, no new colors.
+ */
+
+/* The archive's logo stands where 5chan rotates its 300x100 board banners. */
+.banner img {
+  height: 100px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.bannerLink {
+  display: inline-block;
+}
+
+/* 5chan renders no banner on mobile. */
+@media (max-width: 640px) {
+  .banner {
+    display: none;
+  }
+}
+
+/* The board header's title is the page's h1 here; keep 5chan's size, not the UA's. */
+.title {
+  font-size: var(--board-title-font-size);
+  word-break: break-word;
+}
+
+.subtitle a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.subtitle a:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+/* Where 5chan's post form toggle sits: a way out to 5chan, never a fake form. */
+.postFormDesktop {
+  font-size: var(--post-form-toggle-font-size);
+  font-weight: var(--post-form-toggle-font-weight);
+  width: 468px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.postFormMobile {
+  display: none;
+  text-align: center;
+  margin: -3px 0 8px;
+}
+
+.closed {
+  font-size: x-large;
+  text-align: center;
+  color: red;
+  font-weight: 700;
+  padding: 30px 15px;
+}
+
+.closed a {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--button-desktop-text-color);
+  text-decoration: var(--button-text-decoration);
+}
+
+.closed a:hover {
+  color: var(--button-desktop-text-color-hover);
+}
+
+@media (max-width: 640px) {
+  .postFormDesktop {
+    display: none;
+  }
+
+  .postFormMobile {
+    display: block;
+  }
+
+  .closed {
+    font-size: large;
+    padding: 15px;
+  }
+}
+
+/* A reply reached by its old #p<cid> fragment highlights like 5chan's route target. */
+.target:target :global(.highlightable) {
+  background: var(--reply-highlight-background-color) !important;
+  border: var(--reply-highlight-border) !important;
+}
+
+.notice {
+  padding: 15px 5px 20px;
+  color: var(--post-mobile-abbr-text-color);
+}
+
+.notice strong {
+  color: var(--body-font-color);
+}
+
+.notice code {
+  font-family: monospace;
+}
+
+.nothingFound {
+  color: red;
+  display: block;
+  margin: 0;
+  padding: 1em 0;
+  text-align: center;
+  font-size: x-large;
+  font-weight: bold;
+  line-height: normal;
+}
+
+/* "Archived from 5chan on …" under an OP: 5chan's own small gray note style. */
+.provenance {
+  color: var(--post-mobile-abbr-text-color);
+  font-size: var(--post-mobile-abbr-font-size);
+}
+
+.provenance a {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.provenance a:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+.searchForm {
+  display: inline;
+}
+
+/* Page-level text (legal), boxed like 5chan's FAQ/rules pages. */
+.page {
+  max-width: 748px;
+  margin: 0 auto;
+}
+
+.page p {
+  margin: 0 0 1em;
+  line-height: 1.5em;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 10px;
+  }
+}
+
+/* 5chan src/components/site-legal-meta/site-legal-meta.module.css */
+.licenseText {
+  display: inline-flex;
+  align-items: center;
+}
+
+.bitsocialLogoLink {
+  display: block;
+  flex: 0 0 auto;
+  margin-left: 1px;
+  line-height: 0;
+}
+
+.bitsocialLogo {
+  display: block;
+  width: 18px;
+  height: 18px;
+  filter: contrast(1.12);
+}
+
+.legalLinks {
+  display: block;
+  margin-top: 5px;
+}
+
+/* The home info box title is the page's h1; size it like 5chan's box h2s. */
+.boxHeading {
+  font-size: 131%;
+  font-weight: 700;
+  padding-right: 24px;
+}
+
+/* 5chan lays its catalog out in virtualized rows; server-rendered, one wrapping row does the same. */
+.catalogGrid {
+  flex-wrap: wrap;
+}
+
+/* 5chan's home board placeholder (a.placeholder there): a board with nothing behind it. */
+.placeholder {
+  color: #aaa;
+}
+
+/* 5chan keys its directory table colors on body.<theme>; here the theme class
+   sits on the page wrapper (see ThemeRoot), so the same colors key on that. */
+:global(.yotsuba) .directoryRowOdd td {
+  background: #ede2d4;
+}
+
+:global(.yotsuba) .directoryTable thead th {
+  background: #ea8;
+}
+
+:global(.yotsuba-b) .directoryRowOdd td {
+  background: #e0e5f6;
+}

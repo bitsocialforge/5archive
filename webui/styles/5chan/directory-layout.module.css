@@ -1,0 +1,471 @@
+/* Copied verbatim from 5chan src/components/directory-layout/directory-layout.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.page {
+  max-width: none;
+  margin: 0;
+  padding: 0 0 24px;
+  color: var(--body-font-color);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size);
+}
+
+.desktopDivider {
+  display: block;
+}
+
+.divider {
+  display: block;
+}
+
+.desktopNavLinks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.navButtonGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.submitBoardControl {
+  white-space: nowrap;
+}
+
+.desktopNavLinks a:not([class~='button']),
+.desktopFooterButtons a:not([class~='button']) {
+  all: unset;
+}
+
+.mobileNavLinks {
+  display: none;
+  text-align: center;
+  text-transform: capitalize;
+  margin-top: 5px;
+}
+
+.mobileNavLinks button,
+.mobileNavLinks a[class~='button'],
+.mobileFooterButtons button,
+.mobileFooterButtons a[class~='button'] {
+  text-transform: capitalize;
+  margin: 5px 2px;
+}
+
+.mobileSubmitRow {
+  margin-top: -5px;
+}
+
+.mobileNavLinks a:not([class~='button']),
+.mobileFooterButtons a:not([class~='button']) {
+  all: unset;
+}
+
+.desktopFooterButtons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  text-transform: capitalize;
+}
+
+.mobileFooterButtons {
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.directorySummary {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.directoryIntro {
+  width: 80%;
+  max-width: 810px;
+  margin: 0 auto 8px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.directoryIntro a {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.directoryIntro a:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+.error {
+  margin-bottom: 8px;
+}
+
+.flashListing {
+  width: 80%;
+  max-width: 810px;
+  margin: 10px auto 0;
+  border-collapse: separate;
+  border-spacing: 1px;
+  table-layout: auto;
+}
+
+.flashListing th,
+.flashListing td {
+  padding: 2px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.flashListing thead th,
+.flashListing thead td {
+  background: #98e;
+  border: 1px solid #000;
+  font-weight: 700;
+}
+
+.dirRow {
+  background: transparent;
+}
+
+.numberCell,
+.scoreCell,
+.ownerCell,
+.statusCell,
+.actionsCell {
+  white-space: nowrap;
+}
+
+.numberCell,
+.scoreCell,
+.actionsCell {
+  width: 1%;
+}
+
+.postblock {
+  padding: 5px !important;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.boardCol {
+  text-align: center;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.ownerCell,
+.statusCell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.statusLoading {
+  display: block;
+  text-align: center;
+}
+
+.ownerName {
+  font-weight: var(--post-name-font-weight, 700);
+}
+
+.ownerCapcode {
+  white-space: nowrap;
+}
+
+.viewLink {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.viewLink:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+.actionButton {
+  all: unset;
+  cursor: pointer;
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.actionButton:hover,
+.actionButton:focus-visible {
+  color: var(--post-link-text-color-hover);
+}
+
+.actionButton:focus-visible {
+  outline: 1px dotted currentcolor;
+  outline-offset: 1px;
+}
+
+.scoreValue {
+  font-weight: 700;
+}
+
+.scorePending {
+  margin-left: 1px;
+  font-size: 0.75em;
+  cursor: help;
+}
+
+.statusOnline {
+  color: green;
+}
+
+.statusOffline {
+  color: red;
+}
+
+.statusUnavailable {
+  color: var(--body-font-color);
+}
+
+.statusUnavailableHelp {
+  all: unset;
+  margin-left: 2px;
+  font-weight: 700;
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+  cursor: help;
+}
+
+.statusUnavailableHelp:focus-visible {
+  outline: 1px dotted currentcolor;
+  outline-offset: 1px;
+}
+
+.actionButton:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.submitBoardToggle {
+  margin: 14px auto 0;
+  text-align: center;
+  font-size: 13px;
+}
+
+.submitBoardForm {
+  margin: 14px auto 0;
+  text-align: center;
+  font-size: 11px;
+}
+
+.submitBoardForm label {
+  font-weight: 700;
+}
+
+.submitBoardForm input[type='text'] {
+  width: 220px;
+  max-width: 60vw;
+  padding: 2px;
+  outline: none;
+  border: var(--reply-modal-field-input-border, 1px solid #aaa);
+  border-radius: 0;
+  font-size: 11px;
+}
+
+.submitBoardForm input[type='text']:focus {
+  border: var(--reply-modal-field-input-border-focus, 1px solid #ea8);
+}
+
+@media (max-width: 640px) {
+  .submitBoardForm input[type='text'] {
+    font-size: 16px;
+  }
+}
+
+/* Left-aligned list in a centered column under the submit form. */
+.requirements {
+  width: fit-content;
+  max-width: calc(100% - 10px);
+  margin: 6px auto 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.requirementsTitle {
+  font-weight: 700;
+}
+
+.requirements ul {
+  margin: 2px 0;
+  padding-left: 20px;
+}
+
+.requirements a {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.requirements a:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+.requirementSetting {
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+
+.voteNotice {
+  width: 80%;
+  max-width: 810px;
+  margin: 0 auto 10px;
+  text-align: center;
+  color: red;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.voteNotice a {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.voteNotice a:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+.voteNoticeAddress {
+  font-family: monospace;
+  font-weight: 400;
+  word-break: break-all;
+}
+
+/* Matches the classic imageboard global message row between the board header and nav links. */
+.directoryNotice {
+  width: 80%;
+  max-width: 810px;
+  margin: 0 auto;
+  color: red;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.directoryNotice a {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-link-text-decoration);
+}
+
+.directoryNotice a:hover {
+  color: var(--post-link-text-color-hover);
+}
+
+.footerState {
+  margin: 8px 0;
+  text-align: center;
+}
+
+.garland {
+  border-image-slice: 50 0 50 0;
+  border-image-width: 40px 0px 0px 0px;
+  border-image-outset: 0px 0px 0px 0px;
+  border-image-repeat: repeat repeat;
+  border-image-source: url('/assets/garland.png');
+  border-style: solid;
+  padding-top: 50px;
+}
+
+@media (max-width: 640px) {
+  .desktopDivider,
+  .desktopNavLinks {
+    display: none;
+  }
+
+  .mobileNavLinks {
+    display: block;
+  }
+
+  .flashListing,
+  .directoryIntro,
+  .voteNotice,
+  .directoryNotice {
+    width: calc(100% - 10px);
+    max-width: calc(100% - 10px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .flashListing {
+    margin-top: 10px;
+  }
+
+  .postblock,
+  .ownerCell,
+  .actionsCell {
+    white-space: normal;
+  }
+}
+
+:global(body.yotsuba) .rowOdd td {
+  background: #ede2d4;
+}
+
+:global(body.yotsuba) .flashListing thead th,
+:global(body.yotsuba) .flashListing thead td {
+  background: #ea8;
+}
+
+:global(body.yotsuba-b) .rowOdd td {
+  background: #e0e5f6;
+}
+
+:global(body.futaba) .rowOdd td {
+  background: #ede2d4;
+}
+
+:global(body.futaba) .flashListing thead th,
+:global(body.futaba) .flashListing thead td {
+  background: #f0e0d6;
+}
+
+:global(body.burichan) .rowOdd td {
+  background: #e0e5f6;
+}
+
+:global(body.burichan) .flashListing thead th,
+:global(body.burichan) .flashListing thead td {
+  background: #c3c9e9;
+}
+
+:global(body.tomorrow) .rowOdd td {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:global(body.spooky) .rowOdd td {
+  background: #1b1024;
+}
+
+:global(body.tomorrow) .flashListing thead th,
+:global(body.tomorrow) .flashListing thead td {
+  background: var(--post-form-field-title-background-color);
+  color: var(--post-form-field-title-color);
+  border: none;
+}
+
+:global(body.spooky) .flashListing thead th,
+:global(body.spooky) .flashListing thead td {
+  background: var(--post-form-field-title-background-color);
+  color: var(--post-form-field-title-color);
+  border: none;
+}
+
+:global(body.photon) .rowOdd td {
+  background: #888;
+}
+
+:global(body.photon) .flashListing thead th,
+:global(body.photon) .flashListing thead td {
+  background: #ddd;
+}

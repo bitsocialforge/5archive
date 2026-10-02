@@ -11,14 +11,20 @@
  * (5archive.org/biz), so an archived thread stays reachable when the directory
  * rotates to another board. Titles come from `5chan-directories-defaults.json`.
  *
+ * directories.json only grows: a board that leaves a code's list stays mapped
+ * to the code (as `former`), so its threads keep their /<code>/thread/<cid>
+ * URLs. See directory-history.mjs. communities.json, the crawl set, follows
+ * the current lists only.
+ *
  *   node scripts/build-communities.mjs        # writes both files
  *
  * Set GITHUB_TOKEN to raise the API rate limit (only one API call is made; the
  * per-file fetches hit raw.githubusercontent.com and aren't rate-limited).
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mergeDirectories } from './directory-history.mjs';
 
 const REPO = 'bitsocialnet/lists';
 const DIR = '5chan-directories';
@@ -55,13 +61,15 @@ for (const f of files) {
   directories.push({ code, title: defaults[code]?.title ?? `/${code}/`, boards });
 }
 
-directories.sort((a, b) => a.code.localeCompare(b.code));
+const previous = JSON.parse(await readFile(directoriesPath, 'utf8').catch(() => '[]'));
+const merged = mergeDirectories(previous, directories);
 const communities = [...addresses].sort();
 
 await mkdir(dirname(communitiesPath), { recursive: true });
 await writeFile(communitiesPath, `${JSON.stringify(communities, null, 2)}\n`);
-await writeFile(directoriesPath, `${JSON.stringify(directories, null, 2)}\n`);
+await writeFile(directoriesPath, `${JSON.stringify(merged, null, 2)}\n`);
 console.log(
   `Wrote ${communities.length} communities to config/communities.json and ` +
-    `${directories.length} directories to webui/lib/directories.json (from ${files.length} directory files)`,
+    `${merged.length} directories to webui/lib/directories.json (from ${files.length} directory files; ` +
+    `${merged.reduce((sum, d) => sum + (d.former?.length ?? 0), 0)} former boards kept)`,
 );

@@ -1,0 +1,512 @@
+/*
+ * Yotsuba and Yotsuba B theme variables, copied verbatim from 5chan
+ * src/themes.css @ ec4574801. 5chan picks Yotsuba for NSFW boards and the home page,
+ * Yotsuba B for worksafe boards; lib/theme.ts makes the same choice here.
+ * Re-sync by copying the two blocks again rather than editing them in place.
+ */
+:root {
+  --code-block-background-color: #ffffff;
+  --code-block-border: none;
+  --code-token-pln-color: #000000;
+  --code-token-str-color: #008000;
+  --code-token-kwd-color: #000088;
+  --code-token-com-color: #880000;
+  --code-token-lit-color: #006666;
+  --code-token-pun-color: #666600;
+}
+
+
+:root .yotsuba {
+  --color-scheme: light;
+
+  /* avatar */
+  --avatar-text-color: black;
+  
+  /* backlink */
+  --post-backlink-text-color: navy;
+  --post-backlink-text-decoration: underline;
+  --post-backlink-text-color-hover: red;
+  --post-backlink-text-decoration-hover: underline;
+  --reply-backlink-mobile-background-color: #ead6ca;
+  --reply-backlink-mobile-border-top: 1px solid #d9bfb7;
+
+  /* board banner */
+  --banner-image-border: 1px solid #800;
+  --board-title-font-size: 28px;
+  --board-title-font-family: Tahoma, sans-serif;
+  --board-address-font-size: x-small;
+
+  /* body */
+  --body-background-base-color: #ffe;
+  --body-background-pattern-image: url("/assets/background-fade.png");
+  --body-font-color: maroon;
+  --body-font-family: arial, helvetica, sans-serif;
+  --body-font-size: 13px;
+
+  /* catalog post */
+  --catalog-post-menu-desktop-btn-color: navy;
+  --catalog-post-menu-desktop-btn-hover-color: red;
+  --catalog-post-menu-desktop-btn-opacity: 0.5;
+  --catalog-post-menu-desktop-btn-hover-opacity: 1;
+  --catalog-post-preview-background-color: #181f24;
+  --catalog-post-preview-color: #dedede;
+  --catalog-post-preview-subject-color: #cc1105;
+  --catalog-post-preview-author-color: #00a550;
+  --catalog-post-preview-last-color: #bbbfbd;
+  --catalog-post-preview-author-capcode-color: purple;
+
+  /* challenge modal */
+  --challenge-modal-background-color: #f0e0d6;
+  --challenge-modal-border: 1px solid #d9bfb7;
+  --challenge-modal-title-background-color: #ea8;
+  --challenge-modal-title-text-color: #800;
+  --challenge-modal-title-border: 1px solid #800;
+  --challenge-modal-title-font-size: 10pt;
+  --challenge-modal-title-font-weight: 700;
+
+  /* desktop buttons */
+  --button-desktop-text-color: #00e;
+  --button-desktop-text-color-hover: red;
+  --close-button-background-image: url("/assets/buttons/cross-red.png");
+  --open-help-button-background-image: url("/assets/buttons/help-red.png");
+
+  /* horizontal rule */
+  --hr-border: none;
+  --hr-border-top: 1px solid #d9bfb7;
+  --hr-height: 0px;
+
+  /* pagelist */
+  --pagelist-background-color: #F0E0D6;
+  --pagelist-item-background-color: #f0e0d6;
+  --pagelist-item-border-color: #d9bfb7;
+  --pagelist-item-text-color: #800;
+  --pagelist-item-text-color-hover: red;
+  --pagelist-item-text-color-current: #800;
+
+  /* homepage */
+  --homepage-infobox-text-color: #000;
+  --homepage-infobox-bar-text-color: #fff;
+  --homepage-infobox-bar-background-color: #800;
+  --homepage-box-background-color: #fff;
+  --homepage-box-border-color: #800;
+  --homepage-box-bar-text-color: #800;
+  --homepage-box-bar-text-color-hover: #c63;
+  --homepage-box-bar-background-color: #fca;
+  --homepage-infobox-link-text-color: #00f;
+  --homepage-infobox-link-text-decoration: underline;
+  --homepage-box-link-text-color: #800;
+  --homepage-box-link-text-color-hover: #e00;
+  --homepage-box-link-text-decoration: none;
+  --homepage-box-link-text-decoration-hover: underline;
+  --directory-modal-background-color: rgb(255, 255, 255);
+  --directory-modal-border: 1px solid rgb(136, 0, 0);
+  --directory-modal-text-color: rgb(136, 0, 0);
+  --directory-modal-header-background-color: rgb(136, 0, 0);
+  --directory-modal-header-text-color: rgb(255, 255, 255);
+  --directory-modal-close-button-background-image: url("/assets/buttons/cross-red.png");
+  --disclaimer-modal-close-button-background-image: url("/assets/buttons/cross-red.png");
+  
+
+  /* footer */
+  --footer-item-background-color-desktop: #fed;
+
+  /* links */
+  --post-link-text-color: #00e;
+  --post-link-text-decoration: underline;
+  --post-link-text-color-hover: red;
+  --post-link-text-decoration-hover: underline;
+  --post-content-link-text-decoration: none;
+  --post-content-link-text-decoration-hover: none;
+
+  /* media */
+  --media-thumbnail-background-color: rgba(0, 0, 0, 0.05);
+
+  /* mobile buttons */
+  --button-font-size-mobile: 10pt;
+  --button-font-weight-mobile: 700;
+  --button-text-color-mobile: #800;
+  --button-background-image-mobile: url("/assets/buttons/button-fade.png");
+  --button-background-color-mobile: #f0e0d6;
+  --button-border-mobile: 1px solid #c0a69d;
+
+  /* post capcodes */
+  --post-capcode-mod-text-color: purple;
+
+  /* post desktop */
+  --post-hide-button-background-image: url("/assets/buttons/minus-red.png");
+  --post-unhide-button-background-image: url("/assets/buttons/plus-red.png");
+  --post-subject-text-color: #cc1105;
+  --post-subject-font-weight: 700;
+  --post-name-text-color: #117743;
+  --post-name-font-weight: 700;
+  --post-menu-desktop-button-color: #000080;
+  --post-menu-desktop-btn-opacity: 0.8;
+  --post-menu-desktop-button-color-hover: red;
+  --post-greentext-color: #789922;
+
+  /* post form */
+  --post-form-toggle-font-size: 22px;
+  --post-form-toggle-font-weight: 700;
+  --post-form-field-title-background-color: #ea8;
+  --post-form-field-title-color: #800;
+  --post-form-field-border: 1px solid #800;
+  --post-form-field-title-font-weight: 700;
+  --post-form-field-title-padding: 0 5px;
+  --post-form-field-title-font-size: 10pt;
+  --post-form-field-input-border: 1px solid #aaa;
+  --post-form-field-font-family: arial, helvetica, sans-serif;
+  --post-form-field-input-appearance: none;
+  --post-form-field-input-outline: none;
+  --post-form-field-input-focus-border: 1px solid #ea8;
+  --post-form-field-input-color: #000;
+
+  /* post menu desktop */
+  --post-menu-desktop-border-bottom: 2px solid #d9bfb7;
+  --post-menu-desktop-border-right: 1px solid #d9bfb7;
+  --post-menu-desktop-background-color: #f0e0d6;
+  --post-menu-desktop-item-border-color: #d9bfb7;
+  --post-menu-desktop-item-background-color: #f0e0d6;
+  --post-menu-desktop-item-hover-background-color: #ffe;
+
+  /* post menu mobile */
+  --post-menu-mobile-background-color: #f0e0d6;
+  --post-menu-mobile-border: 1px solid #d9bfb7;
+  --post-menu-mobile-border-right-width: 2px;
+  --post-menu-mobile-item-border-bottom: 1px solid #d9bfb7;
+  --post-menu-mobile-item-hover-background-color: #ffe;
+
+  /* post mobile */
+  --post-mobile-background-color: #f5e9e1;
+  --post-mobile-info-border-bottom: 1px solid #d9bfb7;
+  --post-mobile-info-background-color: #ead6ca;
+  --post-mobile-menu-button-color: #00e;
+  --post-mobile-name-text-color: #117743;
+  --post-mobile-name-font-weight: 700;
+  --post-mobile-subject-text-color: #cc1105;
+  --post-mobile-subject-font-weight: 700;
+  --post-mobile-link-background-color: #ead6ca;
+  --post-mobile-link-border-top: 1px solid #d9bfb7;
+  --post-mobile-link-info-text-color: #800;
+  --post-mobile-abbr-text-color: #707070;
+  --post-mobile-abbr-font-size: 10pt;
+  --post-mobile-file-info-text-color: #707070;
+  --post-mobile-content-font-size: 11pt;
+
+  /* quotelink */
+  --post-quotelink-text-color: navy;
+  --post-quotelink-text-color-hover: red;
+  --post-quotelink-text-decoration: underline;
+  --post-quotelink-text-decoration-hover: underline;
+  --quote-preview-background:  #f0e0d6;
+  --quote-preview-border: 1px solid #d9bfb7;
+  --quote-preview-border-right: 2px solid #d9bfb7;
+  --quote-preview-border-bottom: 2px solid #d9bfb7;
+
+  /* reply desktop */
+  --side-arrows-color: #e0bfb7;
+  --reply-desktop-background-color: #f0e0d6;
+  --reply-desktop-border: 1px solid #d9bfb7;
+
+  /* reply highlight */
+  --reply-highlight-background-color: #f0c0b0;
+  --reply-highlight-border: 1px solid #d99f91;
+  --reply-double-highlight-background-color: #e8a690;
+  --reply-double-highlight-border: 1px solid #d99f91;
+
+  /* reply modal */
+  --reply-modal-field-input-border: 1px solid #aaa;
+  --reply-modal-field-input-border-focus: 1px solid #ea8;
+
+  /* settings modal */
+  --settings-modal-font-size: 14px;
+  --settings-modal-background-color: #f0e0d6;
+  --settings-modal-header-border-bottom: 1px solid #d9bfb7;
+  --settings-modal-border-top: none;
+  --settings-modal-border-right: 1px solid #d9bfb7;
+  --settings-modal-border-bottom: 1px solid #d9bfb7;
+  --settings-modal-border-left: none;
+  --settings-modal-close-button-background-image: url("/assets/buttons/cross-red.png");
+  --settings-modal-show-button-background-image: url("/assets/buttons/plus-red.png");
+  --settings-modal-hide-button-background-image: url("/assets/buttons/minus-red.png");
+
+  /* stats */
+  --stats-font-size: 11px;
+
+  /* tooltip */
+  --tooltip-background-color: #181f24;
+  
+  /* boardsbar */
+  --boardsbar-font-size: 9pt;
+  --boardsbar-separator-color: #b86;
+  --boardsbar-desktop-link-text-color: #800;
+  --boardsbar-desktop-link-text-color-hover: #e00;
+  --boardsbar-desktop-link-text-decoration: none;
+  --boardsbar-desktop-link-text-decoration-hover: none;
+  --boardsbar-mobile-background-color: #f0e0d6;
+  --boardsbar-mobile-border-bottom: 2px solid #d9c5b7;
+  --boardsbar-mobile-font-size: 10px;
+  --boardsbar-mobile-button-text-color: navy;
+
+  /* mod queue */
+  --mod-queue-table-border: 1px solid #d9bfb7;
+  --mod-queue-header-background-color: #f0e0d6;
+  --mod-queue-header-border-bottom: 2px solid #d9bfb7;
+  --mod-queue-row-background-color: #ffe;
+  --mod-queue-row-border-bottom: 1px solid #d9bfb7;
+  --mod-queue-row-hover-background-color: #f0e0d6;
+  --mod-queue-button-text-color: #00e;
+  --mod-queue-button-text-color-hover: red;
+  --mod-queue-button-text-decoration: underline;
+  --mod-queue-approve-color: #00e;
+  --mod-queue-approve-color-hover: green;
+  --mod-queue-reject-color: #00e;
+  --mod-queue-reject-color-hover: red;
+  --mod-queue-time-color: #707070;
+  --mod-queue-alert-color: red;
+}
+
+:root .yotsuba-b {
+  --color-scheme: light;
+  
+  /* backlink */
+  --post-backlink-text-color: #34345C;
+  --post-backlink-text-decoration: underline;
+  --post-backlink-text-color-hover: #dd0000;
+  --post-backlink-text-decoration-hover: underline;
+  --reply-backlink-mobile-background-color: #c9cde8;
+  --reply-backlink-mobile-border-top: 1px solid #b7c5d9;
+
+  /* board banner */
+  --banner-image-border: 1px solid #34345c;
+  --board-title-font-size: 28px;
+  --board-title-font-family: Tahoma, sans-serif;
+  --board-address-font-size: x-small;
+  --board-title-text-color: #af0a0f;
+  --board-address-text-color: #af0a0f;
+
+  /* body */
+  --body-background-base-color: #eef2ff;
+  --body-background-pattern-image: url("/assets/background-fade-blue.png");
+  --body-font-color: #000;
+  --body-font-family: arial, helvetica, sans-serif;
+  --body-font-size: 13px;
+
+  /* catalog post */
+  --catalog-post-menu-desktop-btn-color: navy;
+  --catalog-post-menu-desktop-btn-hover-color: #d00;
+  --catalog-post-menu-desktop-btn-opacity: 0.5;
+  --catalog-post-menu-desktop-btn-hover-opacity: 1;
+  --catalog-post-preview-background-color: #181f24;
+  --catalog-post-preview-color: #dedede;
+  --catalog-post-preview-author-color: #00a550;
+  --catalog-post-preview-last-color: #bbbfbd;
+  --catalog-post-preview-author-capcode-color: purple;
+
+  /* challenge modal */
+  --challenge-modal-background-color: #d6daf0;
+  --challenge-modal-border: 1px solid #b7c5d9;
+  --challenge-modal-title-background-color: #98e;
+  --challenge-modal-title-text-color: #000;
+  --challenge-modal-title-border: 1px solid #000;
+  --challenge-modal-title-font-size: 10pt;
+  --challenge-modal-title-font-weight: 700;
+
+  /* desktop buttons */
+  --button-desktop-text-color: #34345c;
+  --button-desktop-text-color-hover: #d00;
+  --close-button-background-image: url("/assets/buttons/cross-blue.png");
+  --open-help-button-background-image: url("/assets/buttons/help-blue.png");
+
+  /* footer */
+  --footer-item-background-color-desktop: #eef2ff;
+
+  /* pagelist */
+  --pagelist-background-color: #D6DAF0;
+  --pagelist-item-background-color: #d6daf0;
+  --pagelist-item-border-color: #b7c5d9;
+  --pagelist-item-text-color: #89a;
+  --pagelist-item-text-color-hover: #d00;
+  --pagelist-item-text-color-current: #000;
+
+  /* homepage */
+  --homepage-infobox-text-color: #000;
+  --homepage-infobox-bar-text-color: #000;
+  --homepage-infobox-bar-background-color: #98e;
+  --homepage-box-background-color: #fff;
+  --homepage-box-border-color: #000;
+  --homepage-box-bar-text-color: #000;
+  --homepage-box-bar-text-color-hover: #fff;
+  --homepage-box-bar-background-color: #98e;
+  --homepage-infobox-link-text-color: #00f;
+  --homepage-infobox-link-text-decoration: underline;
+  --homepage-box-link-text-color: #34345c;
+  --homepage-box-link-text-color-hover: #d00;
+  --homepage-box-link-text-decoration: none;
+  --homepage-box-link-text-decoration-hover: underline;
+  --directory-modal-background-color: #d6daf0;
+  --directory-modal-border: 1px solid #b7c5d9;
+  --directory-modal-text-color: #000;
+  --directory-modal-header-background-color: #98e;
+  --directory-modal-header-text-color: #000;
+  --directory-modal-close-button-background-image: url("/assets/buttons/cross-blue.png");
+  --disclaimer-modal-close-button-background-image: url("/assets/buttons/cross-blue.png");
+
+  /* horizontal rule */
+  --hr-border: none;
+  --hr-border-top: 1px solid #b7c5d9;
+
+  /* links */
+  --post-link-text-color: #34345c;
+  --post-link-text-decoration: underline;
+  --post-link-text-color-hover: #d00;
+  --post-link-text-decoration-hover: underline;
+  --post-content-link-text-decoration: none;
+  --post-content-link-text-decoration-hover: none;
+
+  /* media */
+  --media-thumbnail-background-color: rgba(0, 0, 0, 0.05);
+
+  /* mobile buttons */
+  --button-font-size-mobile: 10pt;
+  --button-font-weight-mobile: 700;
+  --button-text-color-mobile: #34345c;
+  --button-background-image-mobile: url("/assets/buttons/button-fade-blue.png");
+  --button-background-color-mobile: #d6daf0;
+  --button-border-mobile: 1px solid #b7c5d9;
+
+  /* post capcodes */
+  --post-capcode-mod-text-color: purple;
+
+  /* post desktop */
+  --post-hide-button-background-image: url("/assets/buttons/minus-blue.png");
+  --post-unhide-button-background-image: url("/assets/buttons/plus-blue.png");
+  --post-subject-text-color: #0f0c5d;
+  --post-subject-font-weight: 700;
+  --post-name-text-color: #117743;
+  --post-name-font-weight: 700;
+  --post-menu-desktop-button-color: #34345c;
+  --post-menu-desktop-btn-opacity: 0.8;
+  --post-menu-desktop-button-color-hover: #d00;
+  --post-greentext-color: #789922;
+
+  /* post form */
+  --post-form-toggle-font-size: 22px;
+  --post-form-toggle-font-weight: 700;
+  --post-form-field-title-background-color: #98e;
+  --post-form-field-title-color: #000;
+  --post-form-field-border: 1px solid #000;
+  --post-form-field-title-font-weight: 700;
+  --post-form-field-title-padding: 0 5px;
+  --post-form-field-title-font-size: 10pt;
+  --post-form-field-input-border: 1px solid #aaa;
+  --post-form-field-font-family: arial, helvetica, sans-serif;
+  --post-form-field-input-appearance: none;
+  --post-form-field-input-outline: none;
+  --post-form-field-input-focus-border: 1px solid #98e;
+  --post-form-field-input-color: #000;
+
+  /* post menu desktop */
+  --post-menu-desktop-border-bottom: 2px solid #b7c5d9;
+  --post-menu-desktop-border-right: 1px solid #b7c5d9;
+  --post-menu-desktop-background-color: #d6daf0;
+  --post-menu-desktop-item-border-color: #b7c5d9;
+  --post-menu-desktop-item-background-color: #d6daf0;
+  --post-menu-desktop-item-hover-background-color: #eef2ff;
+
+  /* post menu mobile */
+  --post-menu-mobile-background-color: #d6daf0;
+  --post-menu-mobile-border: 1px solid #b7c5d9;
+  --post-menu-mobile-border-right-width: 2px;
+  --post-menu-mobile-item-border-bottom: 1px solid #b7c5d9;
+  --post-menu-mobile-item-hover-background-color: #eef2ff;
+
+  /* post mobile */
+  --post-mobile-background-color: #d6daf0;
+  --post-mobile-info-border-bottom: 1px solid #b7c5d9;
+  --post-mobile-info-background-color: #c9cde8;
+  --post-mobile-menu-button-color: #34345c;
+  --post-mobile-name-text-color: #117743;
+  --post-mobile-name-font-weight: 700;
+  --post-mobile-subject-text-color: #0f0c5d;
+  --post-mobile-subject-font-weight: 700;
+  --post-mobile-link-background-color: #c9cde8;
+  --post-mobile-link-border-top: 1px solid #b7c5d9;
+  --post-mobile-link-info-text-color: #34345c;
+  --post-mobile-abbr-text-color: #707070;
+  --post-mobile-file-info-text-color: #707070;
+  --post-mobile-abbr-font-size: 10pt;
+  --post-mobile-content-font-size: 11pt;
+
+  /* quotelink */
+  --post-quotelink-text-color: #d00;
+  --post-quotelink-text-color-hover: #d00;
+  --post-quotelink-text-decoration: underline;
+  --post-quotelink-text-decoration-hover: underline;
+  --quote-preview-background:  #d6daf0;
+  --quote-preview-border: 1px solid #b7c5d9;
+  --quote-preview-border-right: 2px solid #b7c5d9;
+  --quote-preview-border-bottom: 2px solid #b7c5d9;
+
+  /* reply desktop */
+  --side-arrows-color: #b7c5d9;
+  --reply-desktop-background-color: #d6daf0;
+  --reply-desktop-border: 1px solid #b7c5d9;
+
+  /* reply highlight */
+  --reply-highlight-background-color: #d6bad0;
+  --reply-highlight-border: 1px solid #ba9dbf;
+  --reply-double-highlight-background-color: #bfa6ba;
+  --reply-double-highlight-border: 1px solid #ba9dbf;
+
+  /* reply modal */
+  --reply-modal-field-input-border: 1px solid #aaa;
+  --reply-modal-field-input-border-focus: 1px solid #98e;
+
+  /* settings modal */
+  --settings-modal-font-size: 14px;
+  --settings-modal-background-color: #d6daf0;
+  --settings-modal-border-top: none;
+  --settings-modal-border-right: 1px solid #b7c5d9;
+  --settings-modal-border-bottom: 1px solid #b7c5d9;
+  --settings-modal-border-left: none;
+  --settings-modal-header-border-bottom: 1px solid #b7c5d9;
+  --settings-modal-close-button-background-image: url("/assets/buttons/cross-blue.png");
+  --settings-modal-show-button-background-image: url("/assets/buttons/plus-blue.png");
+  --settings-modal-hide-button-background-image: url("/assets/buttons/minus-blue.png");
+
+  /* stats */
+  --stats-font-size: 11px;
+
+  /* tooltip */
+  --tooltip-background-color: #181f24;
+
+  /* boardsbar */
+  --boardsbar-font-size: 9pt;
+  --boardsbar-separator-color: #89a;
+  --boardsbar-desktop-link-text-color: #34345c;
+  --boardsbar-desktop-link-text-color-hover: #d00;
+  --boardsbar-desktop-link-text-decoration: none;
+  --boardsbar-desktop-link-text-decoration-hover: none;
+  --boardsbar-mobile-background-color: #d6daf0;
+  --boardsbar-mobile-border-bottom: 2px solid #b7c5d9;
+  --boardsbar-mobile-font-size: 10px;
+  --boardsbar-mobile-button-text-color: #34345c;
+
+  /* mod queue */
+  --mod-queue-table-border: 1px solid #b7c5d9;
+  --mod-queue-header-background-color: #d6daf0;
+  --mod-queue-header-border-bottom: 2px solid #b7c5d9;
+  --mod-queue-row-background-color: #eef2ff;
+  --mod-queue-row-border-bottom: 1px solid #b7c5d9;
+  --mod-queue-row-hover-background-color: #d6daf0;
+  --mod-queue-button-text-color: #34345c;
+  --mod-queue-button-text-color-hover: #d00;
+  --mod-queue-button-text-decoration: underline;
+  --mod-queue-approve-color: #34345c;
+  --mod-queue-approve-color-hover: green;
+  --mod-queue-reject-color: #34345c;
+  --mod-queue-reject-color-hover: #d00;
+  --mod-queue-time-color: #707070;
+  --mod-queue-alert-color: #d00;
+}
+

@@ -1,0 +1,136 @@
+/* Copied verbatim from 5chan src/components/boards-bar/boards-bar.module.css @ ec4574801. Re-sync by copying, not by editing. */
+
+.boardNavDesktop {
+  font-size: var(--boardsbar-font-size);
+  color: var(--boardsbar-separator-color);
+  position: relative;
+}
+
+.boardNavDesktop button, .boardNavMobile button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  display: inline;
+  font: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.boardNavDesktop button:focus-visible, .boardNavMobile button:focus-visible {
+  outline: 1px dotted currentcolor;
+  outline-offset: 1px;
+}
+
+.checkingSubscriptions {
+  font-size: var(--boardsbar-font-size);
+  color: var(--boardsbar-desktop-link-text-color);
+  text-transform: lowercase;
+}
+
+.boardNavDesktop a, .navTopRight span, .navTopRight button {
+  color: var(--boardsbar-desktop-link-text-color);
+  text-decoration: var(--boardsbar-desktop-link-text-decoration);
+}
+
+.boardList a, .boardList .placeholder, .boardList .temporaryButton {
+  padding: 0 1px;
+}
+
+.placeholder, .temporaryButton {
+  cursor: pointer;
+}
+
+.boardNavDesktop a:hover, .navTopRight span:hover, .navTopRight button:hover {
+  color: var(--boardsbar-desktop-link-text-color-hover);
+  text-decoration: var(--boardsbar-desktop-link-text-decoration-hover);
+  cursor: pointer;
+}
+
+.boardNavDesktop .placeholder {
+  color: var(--boardsbar-separator-color);
+}
+
+.navTopRight {
+  float: right;
+  text-transform: capitalize;
+}
+
+.boardNavDesktop .temporaryButton {
+  color: var(--boardsbar-desktop-link-text-color);
+  text-decoration: var(--boardsbar-desktop-link-text-decoration);
+  text-transform: capitalize;
+}
+
+.navTopRight button {
+  text-transform: capitalize;
+}
+
+.boardNavDesktop .temporaryButton:hover {
+  color: var(--boardsbar-desktop-link-text-color-hover);
+  text-decoration: var(--boardsbar-desktop-link-text-decoration-hover);
+  cursor: pointer;
+}
+
+
+.boardNavMobile {
+  padding: 2px 4px;
+  background-color: var(--boardsbar-mobile-background-color);
+  border-bottom: var(--boardsbar-mobile-border-bottom);
+  font-size: var(--boardsbar-mobile-font-size);
+  position: fixed;
+  width: 100%;
+  z-index: 3;
+  will-change: transform;
+  transform: translateY(0);
+  transition: transform 0.2s ease-in-out;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.boardNavMobile .pageJump a, .boardNavMobile .pageJump span, .boardNavMobile .pageJump button {
+  color: var(--boardsbar-mobile-button-text-color);
+  text-decoration: var(--button-text-decoration-mobile);
+}
+
+.pageJump {
+  position: relative;
+}
+
+.boardNavMobile strong {
+  text-transform: capitalize;
+  padding-right: 5px;
+}
+
+.boardNavMobile select {
+  font-size: var(--boardsbar-mobile-font-size);
+}
+
+.boardSelect {
+  float: left;
+  color: var(--body-font-color);
+}
+
+.pageJump {
+  float: right;
+  padding: 3px 5px 0 0;
+}
+
+.pageJump a, .pageJump span, .pageJump button {
+  padding-right: 5px;
+  text-decoration: var(--homepage-box-link-text-decoration);
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .boardNavDesktop {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .boardNavMobile {
+    display: none;
+  }
+}

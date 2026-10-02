@@ -1,0 +1,82 @@
+/* Copied verbatim from 5chan src/components/markdown/markdown.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.markdown a,
+.markdown a:visited {
+  color: var(--post-link-text-color);
+  text-decoration: var(--post-content-link-text-decoration);
+}
+
+.markdown a:hover,
+.markdown a:visited:hover {
+  color: var(--post-link-text-color-hover);
+  text-decoration: var(--post-content-link-text-decoration-hover);
+}
+
+.markdown .inlineQuoteLink a,
+.markdown .inlineQuoteLink a:visited {
+  color: var(--post-quotelink-text-color);
+  text-decoration: var(--post-quotelink-text-decoration);
+}
+
+.markdown .inlineQuoteLink a:hover,
+.markdown .inlineQuoteLink a:visited:hover {
+  color: var(--post-quotelink-text-color-hover);
+  text-decoration: var(--post-quotelink-text-decoration-hover);
+}
+
+.inlineQuoteLinkResolving {
+  cursor: progress;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.externalQuotePreviewState {
+  min-width: 220px;
+  padding: 8px 12px;
+}
+
+.externalQuotePreviewError {
+  color: #a40000;
+}
+
+.embedButton {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--button-desktop-text-color);
+  display: inline;
+  font: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  text-transform: capitalize;
+}
+
+.embedButton:focus-visible {
+  outline: 1px dotted currentcolor;
+  outline-offset: 1px;
+}
+
+.embedButton:hover {
+  cursor: pointer;
+  color: var(--button-desktop-text-color-hover);
+}
+
+.spoiler {
+  background-color: black;
+  color: black;
+  width: fit-content;
+}
+
+.spoiler:hover {
+  color: white;
+}
+
+.floatingEmbed {
+  background-color: #d6daf0;
+  border: 1px solid #b7c5d9;
+  padding: 2px;
+}
+
+.inline {
+  display: inline;
+}

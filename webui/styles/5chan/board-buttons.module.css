@@ -1,0 +1,187 @@
+/* Copied verbatim from 5chan src/components/board-buttons/board-buttons.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.mobileBoardButtons {
+  text-align: center;
+}
+
+.addMargin {
+  margin-bottom: 7px;
+}
+
+.mobileBoardButtons button,
+.mobileBoardButtons a[class~='button'] {
+  text-transform: capitalize;
+  margin: 5px 2px;
+}
+
+.mobileBoardButtons .secondRow {
+  margin-top: -5px;
+  padding-bottom: 20px;
+}
+
+/* The thread status line below Update and Auto takes the place of the row's bottom padding. */
+.mobileBoardButtons .threadSecondRow {
+  padding-bottom: 0;
+}
+
+.mobileThreadUpdateStatus {
+  height: 20px;
+  line-height: 20px;
+}
+
+.threadUpdateError {
+  color: red;
+}
+
+.mobileBoardButtons {
+  margin-top: -3px;
+}
+
+.mobileBoardButtons .autoCheckbox {
+  margin: 0 3px 0 0;
+  position: relative;
+  top: -2px;
+  border-radius: 0;
+  height: 10px;
+  width: 10px;
+}
+
+.mobileBoardButtons a:not([class~='button']),
+.desktopBoardButtons a:not([class~='button']) {
+  all: unset;
+}
+
+.showBlockedButton {
+  color: var(--button-desktop-text-color);
+}
+
+.showBlockedButton:hover {
+  color: var(--button-desktop-text-color-hover);
+  cursor: pointer;
+}
+
+.mobileBoardButtons .options {
+  padding: 10px 0;
+}
+
+.mobileAllFeedFilterPadding {
+  padding-bottom: 15px;
+}
+
+.desktopBoardButtons {
+  text-transform: capitalize;
+}
+
+.desktopBoardButtons::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.desktopBoardButtons .rightSideButtons {
+  float: right;
+  display: flex;
+  align-items: center;
+}
+
+.modQueueControls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.modQueueControls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.alertThresholdInput {
+  width: 50px;
+}
+
+.mobileBoardButtons .modQueueControls {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0;
+}
+
+.desktopBoardButtons .rightSideButtons select {
+  margin-right: 5px;
+}
+
+.mobileCatalogOptionsPadding {
+  padding-top: 15px;
+}
+
+.filteredThreadsCount {
+  text-transform: none !important;
+}
+
+.hiddenCatalogThreadsToggle {
+  text-transform: none;
+}
+
+.desktopHiddenCatalogThreadsToggle {
+  display: inline;
+}
+
+.hiddenCatalogThreadsToggleAction {
+  all: unset;
+  color: var(--button-desktop-text-color);
+  cursor: pointer;
+}
+
+.hiddenCatalogThreadsToggleAction:hover {
+  color: var(--button-desktop-text-color-hover);
+}
+
+.mobileHiddenCatalogThreadsToggle {
+  display: block;
+  margin-top: 3px;
+  margin-bottom: 15px;
+}
+
+.mobileBoardButtons {
+  text-transform: capitalize;
+}
+
+.mobileBoardButtons .filteredThreadsCount {
+  display: block;
+  margin-top: 3px;
+  margin-bottom: 15px;
+}
+
+.searchOPsInput {
+  height: 16px;
+  line-height: 16px;
+  margin-left: 2px;
+  padding: 0 2px;
+  width: 120px;
+  margin: 0px;
+  margin-right: 4px;
+  padding: 0 2px;
+  border: var(--post-form-field-input-border, revert);
+  background-color: var(--post-form-field-input-background-color, revert);
+  color: var(--post-form-field-input-color);
+  outline: none;
+  font-family: arial, helvetica, sans-serif;
+  font-size: 10pt;
+}
+
+.searchOPsInput:focus {
+  border: var(--post-form-field-input-focus-border, revert);
+}
+
+@media (max-width: 640px) {
+  .desktopBoardButtons {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .mobileBoardButtons {
+    display: none;
+  }
+}

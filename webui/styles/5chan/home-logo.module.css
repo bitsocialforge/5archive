@@ -1,0 +1,9 @@
+/* Copied verbatim from 5chan src/components/home-logo/home-logo.module.css @ ec4574801. Re-sync by copying, not by editing. */
+.logo img {
+  height: 120px;
+}
+
+.logo {
+  margin: 0px auto;
+  text-align: center;
+}

@@ -1,0 +1,61 @@
+/* Copied verbatim from 5chan src/views/catalog/catalog.module.css @ ec4574801. Re-sync by copying, not by editing. */
+/* Virtuoso sets the window scroller's inline height from itemSize, which returns Pretext estimates
+   in item-size mode. When rendered rows are taller, the footer overflows that height and is
+   clipped by the layout. The item list already pads for unrendered rows, so fit the scroller to it. */
+.content [data-virtuoso-scroller] {
+  height: auto !important;
+}
+
+.footer {
+  padding: 15px 0 10px 5px;
+  color: var(--post-mobile-abbr-text-color);
+}
+
+.stateString {
+  padding: 15px 0 10px 5px;
+  color: var(--post-mobile-abbr-text-color);
+}
+
+.searchNothingFound {
+  color: red;
+  display: block;
+  margin: 0;
+  padding: 1em 0;
+  text-align: center;
+  font-size: x-large;
+  font-weight: bold;
+  line-height: normal;
+}
+
+.morePostsSuggestion {
+  padding-bottom: 5px;
+}
+
+.footer a {
+  text-decoration: var(--button-text-decoration);
+  color: var(--button-desktop-text-color);
+}
+
+.morePostsSuggestionAction {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: var(--button-text-decoration);
+  color: var(--button-desktop-text-color);
+  font: inherit;
+}
+
+.footer a:hover {
+  color: var(--button-desktop-text-color-hover);
+}
+
+.morePostsSuggestionAction:hover {
+  color: var(--button-desktop-text-color-hover);
+}
+
+@media (max-width: 640px) {
+  .footer {
+    padding-left: 5px;
+  }
+}

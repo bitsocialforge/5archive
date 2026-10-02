@@ -1,16 +1,11 @@
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
-import { Exo, Manrope } from 'next/font/google';
 import type { ReactNode } from 'react';
+import '@/styles/themes.css';
 import './globals.css';
-import { BrandHeader } from '@/components/BrandHeader';
 import { DevTools } from '@/components/DevTools';
 import { PerfBoundary } from '@/components/PerfBoundary';
-import { SiteFooter } from '@/components/SiteFooter';
-import { siteDescription as description, siteName, siteTitle, siteUrl, theme } from '@/lib/site';
-
-const exo = Exo({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-exo', display: 'swap' });
-const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope', display: 'swap' });
+import { siteDescription as description, siteName, siteTitle, siteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -20,17 +15,16 @@ export const metadata: Metadata = {
   twitter: { card: 'summary' },
 };
 
+/**
+ * No chrome here: like 5chan, the home page and the board pages carry
+ * different chrome, and each page wraps itself in its theme (ThemeRoot).
+ */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" data-theme={theme} className={`${exo.variable} ${manrope.variable}`}>
+    <html lang="en">
       <body>
         <DevTools />
-        <div className="glow" aria-hidden />
-        <PerfBoundary>
-          <BrandHeader />
-          <main className="container">{children}</main>
-          <SiteFooter />
-        </PerfBoundary>
+        <PerfBoundary>{children}</PerfBoundary>
         <Analytics />
       </body>
     </html>

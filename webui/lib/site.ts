@@ -13,9 +13,6 @@ export const siteUrl = (process.env.SITE_URL ?? 'http://localhost:3000').replace
 /** Absolute URL for a site-relative path — sitemaps, JSON-LD. */
 export const absUrl = (path: string) => `${siteUrl}${path}`;
 
-/** UI skin: "default" (Bitsocial dark) or "5chan" (classic imageboard). */
-export const theme = process.env.THEME === '5chan' ? '5chan' : 'default';
-
 /**
  * Optional footer attribution (e.g. "A Bitsocial Forge product"). Nothing is
  * rendered unless BRAND_TEXT is set; BRAND_URL turns it into a link.

@@ -72,6 +72,7 @@ Two deployments:
 | `config/blocklist.json` | Takedown blocklist — CIDs redacted from the archive (see below) |
 | `config/nsfw-overrides.json` | Operator NSFW overrides — per-board verdicts that outrank every other NSFW signal (see `DEPLOY.md`) |
 | `scripts/build-communities.mjs` | Regenerates both generated files from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
+| `scripts/directory-history.mjs` | Keeps every board a code has ever listed in `directories.json` (`former`), so thread URLs never move |
 | `.env.example` | Documents every env var; real `.env` lives only on the VPS |
 | `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
 
@@ -82,19 +83,26 @@ board address:
 
 | URL | Page |
 |-----|------|
-| `5archive.org/biz` | Every archived thread under the `/biz/` directory |
+| `5archive.org/biz` | Every archived thread under the `/biz/` directory, newest first (`/biz/2`, `/biz/3`… for older pages) |
 | `5archive.org/biz/thread/<cid>` | A thread; a reply's cid redirects to its thread, anchored (`#p<cid>`) |
+| `5archive.org/biz/catalog` | The same threads as a catalog of thumbnails |
+| `5archive.org/biz/directory` | Every board ever archived under `/biz/`, listed or not, with thread counts and dates |
+| `5archive.org/<address>` | One board inside a code several boards share; a filter, its threads keep their `/biz/thread/<cid>` URLs |
 
 Several boards can compete for one directory code (the highest-scoring one
 resolves it on 5chan, and 5chan rotates to the next if it goes offline), so the
-directory page merges every candidate board's threads and a thread URL survives
-rotations. The code → boards map is `webui/lib/directories.json`, generated from
-[`bitsocialnet/lists`](https://github.com/bitsocialnet/lists).
+directory page merges every candidate board's threads, labels each thread with
+its board, and a thread URL survives rotations. The code → boards map is
+`webui/lib/directories.json`, generated from
+[`bitsocialnet/lists`](https://github.com/bitsocialnet/lists). It only grows: a
+board that leaves a code's list stays mapped to the code (`former`), so its
+threads never change URL however often the code changes hands
+(`scripts/directory-history.mjs`).
 
 The pre-directory URLs (`/p/<address>`, `/c/<cid>`) permanently redirect to the
-new ones. A board that upstream drops from the directory lists while its threads
-stay archived is served under its address (`5archive.org/<address>`), so nothing
-indexed becomes unreachable.
+new ones. The address of a code's only board redirects to the code. A board
+that has never held a directory code is served under its address
+(`5archive.org/<address>`), so nothing indexed becomes unreachable.
 
 ## Sending readers to 5chan
 
@@ -201,7 +209,10 @@ cd webui && vercel deploy --prod --yes
   `node scripts/build-communities.mjs`, scp `config/` to the VPS, then
   `docker compose restart server`. The same run updates
   `webui/lib/directories.json` — commit it and redeploy the web UI so new or
-  rotated directory codes resolve.
+  rotated directory codes resolve. Boards that left a code's list stay in that
+  file as `former` (never delete them by hand: their thread URLs depend on it);
+  the crawl set in `config/communities.json` follows the current lists only.
+  `node --test scripts/directory-history.test.mjs` covers the merge.
 - **Update the engine (API/crawler):** bump the `image:` tag in
   `docker-compose.yml` to the `bitsocial-indexer` release you want, scp the
   file to the VPS, then `docker compose pull && docker compose up -d`. The tag

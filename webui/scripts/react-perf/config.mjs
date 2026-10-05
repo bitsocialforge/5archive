@@ -8,6 +8,10 @@ const threadPath = archiveRoutes ? `/${communityAddress}/thread/${threadCid}` : 
 // These are initial, deliberately generous development budgets, not production SLAs.
 // The shared runner records each sample and fails missing collector/timing coverage.
 const navigationBudget = { maxCommits: 60, maxRenderMs: 250, maxActionMs: 10000 };
+// A native search submit hydrates a whole new document (~530 elements, mostly the shared
+// boards bar and footer), unlike client-side navigations. At 4x CPU, dev hydration
+// measured ~100 ms locally and ~200 ms on CI; a profiling production build took 13-16 ms.
+const documentHydrationBudget = { ...navigationBudget, maxRenderMs: 400 };
 
 // Threads render a desktop and a mobile copy (CSS shows one); data-* hooks mark one per post.
 async function expectPosts(page, count, selector = '[data-thread]') {
@@ -81,7 +85,7 @@ export default {
             await expectPosts(page, 1);
             await page.locator(`[data-thread="${threadCid}"]`).waitFor({ state: 'attached' });
             await waitForHydration(page);
-          }, navigationBudget, { navigation: true });
+          }, documentHydrationBudget, { navigation: true });
         },
       },
     ],

@@ -80,3 +80,4 @@ jobs:
           name: react-performance-evidence
           path: webui/.react-perf/
           if-no-files-found: warn
+          include-hidden-files: true

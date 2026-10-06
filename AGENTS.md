@@ -34,6 +34,10 @@ After a bug fix or substantive review correction exposes a preventable mistake, 
 
 `scripts/jev/README.md` documents an opt-in bounded browser helper using the installed Playwright CLI and existing machine-wide session lock. Supply the fixture-backed web UI URL, an explicit allowed-action plan, and deterministic completion assertions. Offline plan validation needs no credentials; live semantic choices require explicit `--live`, a pinned model, and a budget. Helpers automatically discover credentials and the default model from the private machine config described in that README, with environment overrides; `node scripts/jev/config.mjs --check` checks readiness without network calls. Offline validation does not read the config or key file. Keep generated evidence outside Git. Use existing deterministic scenarios for fixed navigation/search and Bippy for performance; model judgments do not replace those checks.
 
+## Optional screenshot checks
+
+For visible layout or screenshot-only criteria, use [optional screenshot checks](scripts/visual-qa/README.md) after capturing a task-approved PNG/JPEG through the existing named Playwright session. Validate the explicit manifest offline first. An authorized `--live` run uploads that screenshot to OpenAI Decisions using private machine credentials and makes one bounded request. Results are advisory; uncertainty, refusal, or unavailable evidence requires inspection. Keep failed Playwright assertions and Bippy/React Profiler measurements authoritative. The helper does not open browsers, choose actions, or change application code. Use it only when the visual question benefits from model interpretation.
+
 ## Optional Jev semantic review
 
 For an explicitly selected code or documentation diff, use `scripts/jev/review-README.md`. The bounded helper is opt-in, uses the private machine configuration only with `--live`, and produces advisory issues or uncertainty. Keep ordinary linting, tests, and independent review authoritative; do not add automatic edit, commit, or repair hooks. Offline checks run with `node --test scripts/jev/tests/*.test.mjs`.

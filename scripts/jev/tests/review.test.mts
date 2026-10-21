@@ -68,6 +68,15 @@ test("offline validation never touches credentials or a client", async () => {
   assert.equal(required(result.items[0]).code, "offline");
   assert.equal(record(result.usage).requests, 0);
 });
+test("default rules cover migrated TypeScript scripts", async () => {
+  const result = await reviewPatches(
+    [{ id: "script", path: "scripts/task.mts", diff: '+ status("Done")' }],
+    rules,
+  );
+  const reviewed = required(result.items[0]);
+  assert.equal(reviewed.code, "offline");
+  assert.deepEqual(reviewed.checks.map(({ rule }) => rule), rules.map(({ id }) => id));
+});
 test("only patch and explicit context are sent; labels and identity stay local", async () => {
   const result = await reviewPatches([item], rules, {
     live: true,

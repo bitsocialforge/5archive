@@ -10,10 +10,8 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "types": [
-      "node"
-    ],
-    "typeRoots": [
-      "./node_modules/@types"
+      "node",
+      "next"
     ],
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -25,7 +23,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "next-env.d.ts",
     "../scripts/**/*.mts",
     "scripts/**/*.mts",
     "scripts/**/*.tsx",

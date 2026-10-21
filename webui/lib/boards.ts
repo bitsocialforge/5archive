@@ -31,7 +31,7 @@ export interface HomeCategory {
 }
 
 /** The home page's Boards box: columns of categories of board names. */
-export const HOME_COLUMNS: HomeCategory[][] = [
+export const HOME_COLUMNS: [HomeCategory, ...HomeCategory[]][] = [
   [
     {
       title: 'Japanese Culture',

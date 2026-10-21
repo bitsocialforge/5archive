@@ -43,13 +43,13 @@ Copy optional `community`, `author`, `site`, `url`, `selftext`, and `self` filte
 
 ```sh
 # Baseline/shape check; zero network calls and no credential reads.
-node scripts/jev/rerank.mjs --input /path/to/filtered-shortlist.json
+node --experimental-strip-types scripts/jev/rerank.mts --input /path/to/filtered-shortlist.json
 
 # Explicit live experiment; one batched request for all <=20 candidates.
-node scripts/jev/rerank.mjs --input /path/to/filtered-shortlist.json \
+node --experimental-strip-types scripts/jev/rerank.mts --input /path/to/filtered-shortlist.json \
   --rerank --live --max-requests 1 --max-cost-usd 0.002
 
-node --test scripts/jev/tests/rerank.test.mjs
+node --experimental-strip-types --test scripts/jev/tests/rerank.test.mts
 ```
 
 Live commands reuse the private machine configuration in [shared setup](README.md); no per-repo key or `.env` is needed. The fixed official endpoint, pinned model, and existing input/request/cost/time limits apply. Inputs that exceed the shared client's conservative token budget also retain the baseline order. Estimated cost is separate from provider usage and is not a billing guarantee.
@@ -62,13 +62,13 @@ The JSON output contains ordered stable IDs, scores when applied, bounded choice
 
 ```sh
 # Shows only baseline labeled metrics; no Jev result is claimed.
-node scripts/jev/rerank-eval.mjs
+node --experimental-strip-types scripts/jev/rerank-eval.mts
 
 # Fresh bounded synthetic evaluation, no cache or label leakage.
-node scripts/jev/rerank-eval.mjs --live --max-requests 3 --max-cost-usd 0.005
+node --experimental-strip-types scripts/jev/rerank-eval.mts --live --max-requests 3 --max-cost-usd 0.005
 
 # An independently reviewed, approved export corpus using the same schema.
-node scripts/jev/rerank-eval.mjs --corpus /path/to/reviewed-search-cases.json \
+node --experimental-strip-types scripts/jev/rerank-eval.mts --corpus /path/to/reviewed-search-cases.json \
   --cases selected-query-id --live --max-requests 1
 ```
 
@@ -104,14 +104,14 @@ never takes just the first ten and silently drops the rest. Keep ordinary filter
 pagination, scope and candidate IDs exactly as in the Choice experiment.
 
 ```sh
-node scripts/jev/rerank.mjs --input /path/to/filtered-shortlist.json \
+node --experimental-strip-types scripts/jev/rerank.mts --input /path/to/filtered-shortlist.json \
   --primitive score --rerank --live --max-requests 1 --max-cost-usd 0.002
 
 # Offline paired report; neither variant calls Jev.
-node scripts/jev/rerank-eval.mjs --compare
+node --experimental-strip-types scripts/jev/rerank-eval.mts --compare
 
 # Three shipped synthetic cases, two calls each, no retries or cached answers.
-node scripts/jev/rerank-eval.mjs --compare --live \
+node --experimental-strip-types scripts/jev/rerank-eval.mts --compare --live \
   --max-requests 6 --max-cost-usd 0.005
 ```
 
@@ -146,21 +146,21 @@ independent evidence Noul and validates the exact selected Score legend.
 
 ```sh
 # Validate the trial offline, with no key/config reads and no quality claim.
-node scripts/jev/rerank.mjs --input /path/to/filtered-shortlist.json \
+node --experimental-strip-types scripts/jev/rerank.mts --input /path/to/filtered-shortlist.json \
   --rubric contrastive --rerank
-node scripts/jev/rerank-eval.mjs --primitive score --rubric contrastive
+node --experimental-strip-types scripts/jev/rerank-eval.mts --primitive score --rubric contrastive
 
 # Optional live trial on an explicitly approved, filtered shortlist.
-node scripts/jev/rerank.mjs --input /path/to/filtered-shortlist.json \
+node --experimental-strip-types scripts/jev/rerank.mts --input /path/to/filtered-shortlist.json \
   --primitive score --rubric contrastive --rerank --live \
   --max-requests 1 --max-cost-usd 0.002
 
 # Compare rubrics with the SAME corpus, selected cases, primitive and pinned model.
 # Each has its own one-request/$0.002 cap: at most two requests/$0.004 in total.
-node scripts/jev/rerank-eval.mjs --corpus /path/to/held-out-search-cases.json \
+node --experimental-strip-types scripts/jev/rerank-eval.mts --corpus /path/to/held-out-search-cases.json \
   --cases selected-query-id --primitive score --rubric baseline \
   --live --max-requests 1 --max-cost-usd 0.002
-node scripts/jev/rerank-eval.mjs --corpus /path/to/held-out-search-cases.json \
+node --experimental-strip-types scripts/jev/rerank-eval.mts --corpus /path/to/held-out-search-cases.json \
   --cases selected-query-id --primitive score --rubric contrastive \
   --live --max-requests 1 --max-cost-usd 0.002
 ```

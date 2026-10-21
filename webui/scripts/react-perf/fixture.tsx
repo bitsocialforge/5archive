@@ -1,5 +1,5 @@
 import React, { createContext, memo, Profiler, StrictMode, useContext, useEffect, useState } from 'react';
-import { installCollector } from './collector.mjs';
+import { installCollector } from './collector.mts';
 
 const params = new URLSearchParams(location.search);
 window.__REACT_PERF_DISABLED__ = params.has('disabled');

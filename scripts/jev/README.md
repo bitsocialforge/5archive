@@ -18,7 +18,7 @@ Replace the path and model with your private key file and an available pinned ve
 Check setup from any checkout without making a provider request:
 
 ```sh
-node scripts/jev/config.mjs --check
+node --experimental-strip-types scripts/jev/config.mts --check
 ```
 
 The result reports only readiness, pinned model, and a safe error code if unavailable. Live browser commands then work without exporting the key. Helpers read configuration only for a live Jev run or this explicit check; offline validation and `--live --baseline` do not read credentials.
@@ -33,16 +33,16 @@ Start with the repository's `playwright-cli` skill and inspect the actual page. 
 
 ```sh
 # No browser or network: validate a plan.
-node scripts/jev/browser.mjs --plan /path/to/plan.json
+node --experimental-strip-types scripts/jev/browser.mts --plan /path/to/plan.json
 
 # Same plan, no model: choose the first available unused action in plan order.
-node scripts/jev/browser.mjs --plan /path/to/plan.json --live --baseline
+node --experimental-strip-types scripts/jev/browser.mts --plan /path/to/plan.json --live --baseline
 
 # Uses the private machine config, or runtime key/model overrides.
-node scripts/jev/browser.mjs --plan /path/to/plan.json --live
+node --experimental-strip-types scripts/jev/browser.mts --plan /path/to/plan.json --live
 
 # Runtime model override, if needed; no default or latest alias is committed.
-node scripts/jev/browser.mjs --plan /path/to/plan.json --live --model jev-X.Y.Z
+node --experimental-strip-types scripts/jev/browser.mts --plan /path/to/plan.json --live --model jev-X.Y.Z
 ```
 
 The browser helper uses the shared credential configuration above. Keep the key outside the repository and application bundle.
@@ -120,8 +120,8 @@ Compare the same plan in baseline and Jev modes, across multiple representative 
 ## Offline verification
 
 ```sh
-node --test scripts/jev/tests/*.test.mjs
-node scripts/jev/browser.mjs --help
+node --experimental-strip-types --test scripts/jev/tests/*.test.mts
+node --experimental-strip-types scripts/jev/browser.mts --help
 ```
 
 These fixtures cover multiple actions in one invocation, strict provider validation, bounded requests, injection-resistant action scope, changed targets, origin drift, persistence, uncertainty, and failure cleanup. They never open browsers or call an API. Real installed-CLI and application smoke checks remain necessary before relying on a new plan.

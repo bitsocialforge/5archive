@@ -2,7 +2,7 @@
 
 Use this developer helper after Playwright captures a task-approved screenshot. It asks narrow visual questions and reports advisory observations. Playwright still executes actions and checks DOM state; Bippy and React Profiler still measure rendering. A screenshot cannot establish hidden behavior, accessibility, persistence, or performance.
 
-The current provider is OpenAI Decisions. The manifest and report describe the screenshot and criteria independently of its wire format; `decisions.mjs` owns the provider request and response mapping. Jev currently accepts text only. A future image provider needs an adapter and a new evaluation of its outputs and thresholds, not just a model-name change.
+The current provider is OpenAI Decisions. The manifest and report describe the screenshot and criteria independently of its wire format; `decisions.mts` owns the provider request and response mapping. Jev currently accepts text only. A future image provider needs an adapter and a new evaluation of its outputs and thresholds, not just a model-name change.
 
 ## Capture and run
 
@@ -13,10 +13,10 @@ Use the existing browser guidance in `AGENTS.md` and `scripts/pw-session.sh` to 
 ./webui/node_modules/.bin/playwright-cli -s=check-task screenshot --filename=/absolute/task-artifacts/screenshot.png
 
 # Save the manifest alongside that screenshot, then validate without network or credentials:
-node scripts/visual-qa/check.mjs --input /absolute/task-artifacts/check.json
+node --experimental-strip-types scripts/visual-qa/check.mts --input /absolute/task-artifacts/check.json
 
 # Explicitly upload the selected screenshot and criteria for one bounded request:
-node scripts/visual-qa/check.mjs --input /absolute/task-artifacts/check.json --live
+node --experimental-strip-types scripts/visual-qa/check.mts --input /absolute/task-artifacts/check.json --live
 ```
 
 Example `check.json`:
@@ -61,8 +61,8 @@ Keep manifests, screenshots, and reports in task artifacts outside Git when they
 ## Verification and comparison
 
 ```sh
-node --test scripts/visual-qa/tests/*.test.mjs
-node scripts/visual-qa/check.mjs --help
+node --experimental-strip-types --test scripts/visual-qa/tests/*.test.mts
+node --experimental-strip-types scripts/visual-qa/check.mts --help
 ```
 
 The tests use local images and mocked provider responses. A separate real screenshot smoke test establishes endpoint interoperability, not visual-regression accuracy. See the [Jev and Decisions comparison](https://github.com/bitsocialnet/seedit/blob/eaed0a6d7676b70089873e6707b5e7959031b4f2/scripts/visual-qa/comparison-2026-10-06.md) for the measured text-workflow results and why Jev remains the current text helper.

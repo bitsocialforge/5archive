@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseDirectories, parseListing, parseSource } from './directory-data.mts';
+import { parseDefaults, parseDirectories, parseListing, parseSource } from './directory-data.mts';
 
 test('directory input validation rejects malformed upstream data before writing crawl scope', () => {
   assert.throws(() => parseSource({ boards: [{ address: 4 }] }, 'boards'), /address/);
@@ -41,4 +41,58 @@ test('listing validates URLs only for selected directory and defaults files', ()
       }
     }
   }
+});
+
+test('optional source fields preserve null fallbacks without normalizing explicit strings', () => {
+  for (const field of ['boards', 'communities'] as const) {
+    assert.deepEqual(parseSource({
+      [field]: [{ address: 'a.bso', score: null, addedAt: null, directoryCode: null }],
+      directoryCode: null, tags: null,
+    }, field), { boards: [{ address: 'a.bso' }] });
+    assert.deepEqual(parseSource({
+      [field]: [{ address: 'a.bso', score: 0, addedAt: 0, directoryCode: '' }],
+      directoryCode: '', tags: ['', ' '],
+    }, field), { boards: [{ address: 'a.bso', score: 0, addedAt: 0 }], directoryCode: '', tags: ['', ' '] });
+    assert.deepEqual(parseSource({
+      [field]: [{ address: 'a.bso', directoryCode: ' ' }], directoryCode: ' ',
+    }, field), { boards: [{ address: 'a.bso', directoryCode: ' ' }], directoryCode: ' ' });
+  }
+  for (const boards of [undefined, null]) assert.deepEqual(parseSource({ boards }, 'boards'), { boards: [] });
+  for (const communities of [undefined, null]) assert.throws(() => parseSource({ communities }, 'communities'), /communities array/);
+});
+
+test('defaults preserve null fallbacks and literal blank display text', () => {
+  for (const directories of [undefined, null]) assert.deepEqual(parseDefaults({ directories }), {});
+  assert.deepEqual(parseDefaults({ directories: { news: null, pics: { title: null, description: null } } }), { news: {}, pics: {} });
+  for (const value of ['', ' ']) {
+    assert.deepEqual(parseDefaults({ directories: { news: { title: value, description: value } } }), { news: { title: value, description: value } });
+  }
+});
+
+test('optional metadata still rejects wrong types and non-finite rankings', () => {
+  for (const key of ['score', 'addedAt'] as const) {
+    for (const value of ['0', false, {}, [], NaN, Infinity, -Infinity]) {
+      assert.throws(() => parseSource({ boards: [{ address: 'a.bso', [key]: value }] }, 'boards'), new RegExp(key));
+    }
+  }
+  for (const value of [0, false, {}, []]) {
+    assert.throws(() => parseSource({ boards: [], directoryCode: value }, 'boards'), /Directory code/);
+    assert.throws(() => parseSource({ boards: [{ address: 'a.bso', directoryCode: value }] }, 'boards'), /Candidate directory code/);
+    for (const key of ['title', 'description']) {
+      assert.throws(() => parseDefaults({ directories: { news: { [key]: value } } }), new RegExp(key));
+    }
+  }
+  for (const tags of ['', 0, false, {}, [null], [0]]) assert.throws(() => parseSource({ boards: [], tags }, 'boards'), /tags/);
+  for (const directories of ['', 0, false, []]) assert.throws(() => parseDefaults({ directories }), /defaults map/);
+  for (const value of ['', 0, false, []]) assert.throws(() => parseDefaults({ directories: { news: value } }), /Defaults for news/);
+});
+
+test('history accepts the blank strings emitted by legacy builders while requiring valid addresses', () => {
+  const stored = [{ code: '', title: '', boards: ['a.bso'], description: ' ', tags: ['', ' '] }];
+  assert.deepEqual(parseDirectories(stored), stored);
+  for (const value of [null, 0, false, {}, []]) {
+    assert.throws(() => parseDirectories([{ code: 'news', title: value, boards: ['a.bso'] }]), /title/);
+    assert.throws(() => parseDirectories([{ code: value, title: 'News', boards: ['a.bso'] }]), /code/);
+  }
+  assert.throws(() => parseDirectories([{ code: 'news', title: '', boards: [''] }]), /boards/);
 });

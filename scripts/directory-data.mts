@@ -14,13 +14,18 @@ export function object(value: unknown, source: string): Record<string, unknown> 
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${source} must be an object`);
   return value as Record<string, unknown>;
 }
-function text(value: unknown, source: string): string {
-  if (typeof value !== 'string' || !value.trim()) throw new Error(`${source} must be a nonempty string`);
+function stringValue(value: unknown, source: string): string {
+  if (typeof value !== 'string') throw new Error(`${source} must be a string`);
   return value;
 }
-function strings(value: unknown, source: string): string[] {
+function text(value: unknown, source: string): string {
+  const result = stringValue(value, source);
+  if (!result.trim()) throw new Error(`${source} must be a nonempty string`);
+  return result;
+}
+function strings(value: unknown, source: string, allowBlank = false): string[] {
   if (!Array.isArray(value)) throw new Error(`${source} must be an array`);
-  return value.map((item: unknown) => text(item, source));
+  return value.map((item: unknown) => allowBlank ? stringValue(item, source) : text(item, source));
 }
 export function parseListing(value: unknown, accepts: (name: string) => boolean = () => true): ListingFile[] {
   if (!Array.isArray(value)) throw new Error('Unexpected directory listing');
@@ -38,36 +43,42 @@ export function downloadUrl(value: unknown): string {
 }
 export function parseSource(value: unknown, field: 'boards' | 'communities'): DirectorySource {
   const data = object(value, 'Directory source');
-  const items = data[field];
+  // 5chan permits an absent board list; Seedit requires its communities array.
+  const items = field === 'boards' ? data[field] ?? [] : data[field];
   if (!Array.isArray(items)) throw new Error(`Directory source has no ${field} array`);
   const boards = items.map((item: unknown): Candidate => {
     const entry = object(item, 'Directory candidate');
     const candidate: Candidate = { address: text(entry.address, 'Candidate address').trim() };
     for (const key of ['score', 'addedAt'] as const) {
       const value = entry[key];
-      if (value !== undefined) {
+      if (value !== undefined && value !== null) {
         if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`Candidate ${key} must be finite`);
         candidate[key] = value;
       }
     }
-    if (entry.directoryCode !== undefined) candidate.directoryCode = text(entry.directoryCode, 'Candidate directory code');
+    if (entry.directoryCode !== undefined && entry.directoryCode !== null) {
+      const code = stringValue(entry.directoryCode, 'Candidate directory code');
+      // Subscription ordering previously filtered empty codes with filter(Boolean).
+      if (code) candidate.directoryCode = code;
+    }
     return candidate;
   });
   return {
     boards,
-    ...(data.directoryCode === undefined ? {} : { directoryCode: text(data.directoryCode, 'Directory code') }),
-    ...(data.tags === undefined ? {} : { tags: strings(data.tags, 'Directory tags') }),
+    // Null uses the filename fallback, while an explicit empty code is preserved.
+    ...(data.directoryCode === undefined || data.directoryCode === null ? {} : { directoryCode: stringValue(data.directoryCode, 'Directory code') }),
+    ...(data.tags === undefined || data.tags === null ? {} : { tags: strings(data.tags, 'Directory tags', true) }),
   };
 }
 export function parseDefaults(value: unknown): Record<string, { title?: string; description?: string }> {
   const data = object(value, 'Directory defaults');
-  if (data.directories === undefined) return {};
+  if (data.directories === undefined || data.directories === null) return {};
   const entries = object(data.directories, 'Directory defaults map');
   return Object.fromEntries(Object.entries(entries).map(([code, value]) => {
-    const metadata = object(value, `Defaults for ${code}`);
+    const metadata = object(value ?? {}, `Defaults for ${code}`);
     return [code, {
-      ...(metadata.title === undefined ? {} : { title: text(metadata.title, 'Directory title') }),
-      ...(metadata.description === undefined ? {} : { description: text(metadata.description, 'Directory description') }),
+      ...(metadata.title === undefined || metadata.title === null ? {} : { title: stringValue(metadata.title, 'Directory title') }),
+      ...(metadata.description === undefined || metadata.description === null ? {} : { description: stringValue(metadata.description, 'Directory description') }),
     }];
   }));
 }
@@ -76,11 +87,11 @@ export function parseDirectories(value: unknown): Directory[] {
   return value.map((item: unknown) => {
     const entry = object(item, 'Stored directory');
     return {
-      code: text(entry.code, 'Directory code'), title: text(entry.title, 'Directory title'),
+      code: stringValue(entry.code, 'Directory code'), title: stringValue(entry.title, 'Directory title'),
       boards: strings(entry.boards, 'Directory boards'),
       ...(entry.former === undefined ? {} : { former: strings(entry.former, 'Former boards') }),
-      ...(entry.description === undefined ? {} : { description: text(entry.description, 'Directory description') }),
-      ...(entry.tags === undefined ? {} : { tags: strings(entry.tags, 'Directory tags') }),
+      ...(entry.description === undefined ? {} : { description: stringValue(entry.description, 'Directory description') }),
+      ...(entry.tags === undefined ? {} : { tags: strings(entry.tags, 'Directory tags', true) }),
     };
   });
 }

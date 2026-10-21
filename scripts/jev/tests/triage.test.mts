@@ -258,6 +258,41 @@ test("missing, aliased, or malformed response model stays unverified without exp
   }
 });
 
+test("injected clients need a finite selected-choice probability before classification", async () => {
+  for (const judgment of ["severity", "action"] as const) {
+    for (const [probability, classified] of [
+      [undefined, false],
+      [NaN, false],
+      [Infinity, false],
+      [-Infinity, false],
+      ["1", false],
+      [0, false],
+      [0.79, false],
+      [0.8, true],
+      [1, true],
+    ] as const) {
+      const client = clientFor();
+      const ask = client.ask;
+      client.ask = async () => {
+        const result = await ask();
+        const answer = result.answers[judgment];
+        if (probability === undefined) Reflect.deleteProperty(answer.probabilities, answer.choice);
+        else Reflect.set(answer.probabilities, answer.choice, probability);
+        return result;
+      };
+      const report = await triage({ input, live: true, client });
+      const row = required(report.rows[0]);
+      const context = `${judgment} probability ${String(probability)}`;
+      assert.equal(row.status, classified ? "classified" : "unverified", context);
+      assert.equal(row.reason, classified ? "advisory_classification" : "uncertain_judgment", context);
+      assert.equal(row.severity, classified ? "error" : null, context);
+      assert.equal(row.action, classified ? "inspect_dependency" : null, context);
+      assert.equal(report.metrics.abstentions, classified ? 0 : 1, context);
+      assert.equal(client.stats().requests, 1, context);
+    }
+  }
+});
+
 test("actual client rejects unknown choice and enforces request budget without duplicate calls", async () => {
   let calls = 0;
   const client = createJevClient({

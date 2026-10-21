@@ -137,7 +137,12 @@ export function validatePlan(plan: unknown): BrowserPlan {
       check: ["checkbox", "radio", "switch"],
       uncheck: ["checkbox", "switch"],
     };
-    if (typeof action.op !== 'string' || !allowed[action.op]?.includes(action.role)) fail("invalid_action");
+    if (
+      typeof action.op !== "string" ||
+      !Object.hasOwn(allowed, action.op) ||
+      !allowed[action.op]?.includes(action.role)
+    )
+      fail("invalid_action");
     if (
       ["fill", "select"].includes(action.op)
         ? !text(action.value, 1000)

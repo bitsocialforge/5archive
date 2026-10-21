@@ -28,6 +28,7 @@ async function build(malformed: boolean) {
     ];
     const responses = {
       [`/repos/bitsocialnet/lists/contents/${prefix}-directories`]: [
+        { name: 'unrelated-submodule', type: 'file', download_url: null },
         { name: `${prefix}-news-directory.json`, download_url: 'https://fixture.test/news' },
         { name: `${prefix}-directories-defaults.json`, download_url: 'https://fixture.test/metadata' },
       ],

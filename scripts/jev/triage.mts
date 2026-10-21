@@ -289,12 +289,14 @@ export async function triage({ input, live = false, client, maxRequests = 20, ma
         row.latencyMs = result.latencyMs;
         // These conservative experiment thresholds are not calibrated reliability guarantees.
         const uncertain =
-          [severity, action].some(
-            (answer) =>
-              answer.choice === "uncertain" ||
-              answer.probabilities[answer.choice]! < judgmentPolicy.minimumProbability ||
-              answer.confidence < judgmentPolicy.minimumConfidence,
-          ) ||
+          [severity, action].some((answer) => {
+            const probability = answer.probabilities[answer.choice];
+            return answer.choice === "uncertain" ||
+              typeof probability !== "number" ||
+              !Number.isFinite(probability) ||
+              probability < judgmentPolicy.minimumProbability ||
+              answer.confidence < judgmentPolicy.minimumConfidence;
+          }) ||
           (judgmentPolicy.observeContradictions.includes(severity.choice) &&
             action.choice === "observe");
         row.reason = uncertain ? "uncertain_judgment" : "advisory_classification";

@@ -44,7 +44,10 @@ const getJson = async (url: string): Promise<unknown> => {
   return response.json();
 };
 
-const listing = parseListing(await getJson(`https://api.github.com/repos/${REPO}/contents/${DIR}`));
+const listing = parseListing(
+  await getJson(`https://api.github.com/repos/${REPO}/contents/${DIR}`),
+  (name) => name === DEFAULTS_FILE || /^5chan-.+-directory\.json$/.test(name),
+);
 
 if (!Array.isArray(listing)) throw new Error(`Unexpected listing: ${JSON.stringify(listing).slice(0, 200)}`);
 

@@ -454,6 +454,16 @@ for (const [name, mutate] of Object.entries({
     assert.throws(() => validatePlan(plan));
   });
 
+for (const op of ["constructor", "toString", "__proto__"])
+  test(`rejects inherited action key ${op} with the validation error`, () => {
+    const plan = basePlan();
+    Reflect.set(required(plan.actions[0]), "op", op);
+    assert.throws(
+      () => validatePlan(plan),
+      (error: unknown) => error instanceof JevError && error.code === "invalid_action",
+    );
+  });
+
 for (const missing of [false, true])
   test(`transient ${missing ? "missing target" : "ref replacement"} discards the decision and plans again before acting`, async () => {
     const plan = basePlan();

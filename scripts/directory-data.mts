@@ -22,13 +22,14 @@ function strings(value: unknown, source: string): string[] {
   if (!Array.isArray(value)) throw new Error(`${source} must be an array`);
   return value.map((item: unknown) => text(item, source));
 }
-export function parseListing(value: unknown): ListingFile[] {
+export function parseListing(value: unknown, accepts: (name: string) => boolean = () => true): ListingFile[] {
   if (!Array.isArray(value)) throw new Error('Unexpected directory listing');
   return value.flatMap((item: unknown) => {
     const entry = object(item, 'Directory listing entry');
     const name = text(entry.name, 'Directory listing name');
-    // GitHub directory entries have no download URL and cannot be input files.
-    if (entry.type === 'dir') return [];
+    // Unrelated GitHub entries (including submodules) may have no download URL.
+    // Validate URLs only for the selected inputs the builder will consume.
+    if (entry.type === 'dir' || !accepts(name)) return [];
     return [{ name, download_url: text(entry.download_url, `Download URL for ${name}`) }];
   });
 }

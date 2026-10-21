@@ -20,3 +20,25 @@ test('validated directory input retains candidate rank and route history', () =>
   const stored = [{ code: 'news', title: 'News', boards: ['a.bso'], former: ['old.bso'], description: 'News', tags: ['news'] }];
   assert.deepEqual(parseDirectories(stored), stored);
 });
+
+test('listing validates URLs only for selected directory and defaults files', () => {
+  for (const prefix of ['5chan', 'seedit']) {
+    const directory = `${prefix}-news-directory.json`;
+    const defaults = `${prefix}-directories-defaults.json`;
+    const accepts = (name: string) => name === directory || name === defaults;
+    const selected = [
+      { name: directory, download_url: 'https://example.test/news.json' },
+      { name: defaults, download_url: 'https://example.test/defaults.json' },
+    ];
+    assert.deepEqual(parseListing([
+      { name: 'unrelated-submodule', type: 'file', download_url: null },
+      { name: 'README.md', type: 'file', download_url: null },
+      ...selected,
+    ], accepts), selected);
+    for (const name of [directory, defaults]) {
+      for (const download_url of [null, undefined, '']) {
+        assert.throws(() => parseListing([{ name, download_url }], accepts), /Download URL/);
+      }
+    }
+  }
+});

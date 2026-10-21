@@ -42,6 +42,8 @@ export interface TriageOptions {
 }
 
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value);
+const isProbability = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1;
 const label = (value: unknown): value is string => typeof value === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(value);
 const hash = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const fields = (value: unknown, allowed: string[]): value is Record<string, unknown> =>
@@ -292,9 +294,9 @@ export async function triage({ input, live = false, client, maxRequests = 20, ma
           [severity, action].some((answer) => {
             const probability = answer.probabilities[answer.choice];
             return answer.choice === "uncertain" ||
-              typeof probability !== "number" ||
-              !Number.isFinite(probability) ||
+              !isProbability(probability) ||
               probability < judgmentPolicy.minimumProbability ||
+              !isProbability(answer.confidence) ||
               answer.confidence < judgmentPolicy.minimumConfidence;
           }) ||
           (judgmentPolicy.observeContradictions.includes(severity.choice) &&

@@ -1,5 +1,7 @@
 import { isTombstone } from '@/components/Tombstone';
 import type { Comment } from './types';
+import { parseRaw } from './raw-comment';
+export { embeddedNumbers } from './raw-comment';
 
 /**
  * Display data for one post, derived from its API row and the safe parts of its
@@ -39,22 +41,8 @@ export interface MediaInfo {
   youtubeId?: string;
 }
 
-type Json = Record<string, unknown>;
-
 const positive = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined;
-
-const parseRaw = (raw: string | null | undefined): { comment: Json; update: Json } => {
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw) as { comment?: Json; commentUpdate?: Json };
-      return { comment: parsed.comment ?? {}, update: parsed.commentUpdate ?? {} };
-    } catch {
-      // Unparseable bookkeeping is not worth failing a page over.
-    }
-  }
-  return { comment: {}, update: {} };
-};
 
 /**
  * The name block 5chan prints: the author's display name, "Anonymous", or the
@@ -64,30 +52,6 @@ export function authorLabel(c: Comment): string {
   if (c.takedown || c.removed) return 'Removed';
   if (c.deleted) return 'Deleted';
   return c.author_name?.trim() || 'Anonymous';
-}
-
-/**
- * cid → post number for the replies preloaded in an OP's CommentUpdate. Only
- * those two fields are read: the pages are not redacted, so nothing else in
- * them may reach a page. A redacted reply's own raw is null, so this is where
- * its number survives.
- */
-export function embeddedNumbers(op: Comment): Map<string, number> {
-  const numbers = new Map<string, number>();
-  const walk = (update: Json | undefined, depth: number) => {
-    const pages = (update?.replies as { pages?: Record<string, { comments?: { commentUpdate?: Json }[] }> } | undefined)?.pages;
-    if (!pages || depth > 50) return;
-    for (const page of Object.values(pages)) {
-      for (const reply of page?.comments ?? []) {
-        const cid = reply?.commentUpdate?.cid;
-        const number = positive(reply?.commentUpdate?.number);
-        if (typeof cid === 'string' && number !== undefined) numbers.set(cid, number);
-        walk(reply?.commentUpdate, depth + 1);
-      }
-    }
-  };
-  walk(parseRaw(op.raw).update, 0);
-  return numbers;
 }
 
 /** `numbers` fills in post numbers a comment's own record lacks (see embeddedNumbers). */

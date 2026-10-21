@@ -12,13 +12,15 @@ import styles from '@/styles/5chan/post.module.css';
  */
 export function QuotePreviews() {
   useEffect(() => {
+    const { highlight, reply: replyClass, opContainer, postDesktop, replyDesktop } = styles;
+    if (!highlight || !replyClass || !opContainer || !postDesktop || !replyDesktop) return;
     let preview: HTMLElement | null = null;
     let highlighted: Element | null = null;
 
     const clear = () => {
       preview?.remove();
       preview = null;
-      highlighted?.classList.remove(styles.highlight);
+      highlighted?.classList.remove(highlight);
       highlighted = null;
     };
 
@@ -26,31 +28,32 @@ export function QuotePreviews() {
       const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#p"]') : null;
       if (!link || window.matchMedia('(max-width: 640px)').matches) return;
       const target = document.getElementById(link.hash.slice(1));
-      const post = target?.querySelector(`.${CSS.escape(styles.reply)}`) ?? (target?.classList.contains(styles.opContainer) ? target : null);
+      const post = target?.querySelector(`.${CSS.escape(replyClass)}`) ?? (target?.classList.contains(opContainer) ? target : null);
       if (!post) return;
       clear();
 
       const box = post.getBoundingClientRect();
       if (box.top >= 0 && box.bottom <= window.innerHeight) {
-        post.classList.add(styles.highlight);
+        post.classList.add(highlight);
         highlighted = post;
         return;
       }
 
       // The copy keeps the ancestors 5chan's selectors expect (.postDesktop, .replyDesktop).
-      const copy = post.cloneNode(true) as HTMLElement;
+      const copy = post.cloneNode(true);
+      if (!(copy instanceof HTMLElement)) return;
       copy.removeAttribute('id');
       copy.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
       const isOp = post === target;
       const frame = document.createElement('div');
       frame.className = `${styles.replyQuotePreview} ${isOp ? styles.replyQuotePreviewOp : ''}`;
       const desktop = document.createElement('div');
-      desktop.className = styles.postDesktop;
+      desktop.className = postDesktop;
       if (isOp) {
         desktop.append(copy);
       } else {
         const reply = document.createElement('div');
-        reply.className = styles.replyDesktop;
+        reply.className = replyDesktop;
         reply.append(copy);
         desktop.append(reply);
       }

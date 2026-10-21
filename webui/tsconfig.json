@@ -6,7 +6,7 @@
       "dom.iterable",
       "ES2022"
     ],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -26,7 +26,11 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true
   },
   "include": [
     "next-env.d.ts",
@@ -37,8 +41,8 @@
     ".next-perf/types/**/*.ts",
     ".next-perf-dev/types/**/*.ts",
     ".next-perf-dev/dev/types/**/*.ts",
-    "scripts/react-perf/collector.d.mts",
-    ".next-perf/dev/types/**/*.ts"
+    ".next-perf/dev/types/**/*.ts",
+    "tests/**/*.mts"
   ],
   "exclude": [
     "node_modules"

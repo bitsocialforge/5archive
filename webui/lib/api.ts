@@ -1,5 +1,6 @@
-import { showNsfw } from './site';
-import type { Comment, Community, Health, PostPage, SearchResult, Thread } from './types';
+import { isCommunities, isCommunity, isHealth, isPostPage, isSearchResult, isThread } from './api-contract.ts';
+import { showNsfw } from './site.ts';
+import type { Comment } from './types.ts';
 
 const BASE = process.env.INDEXER_API ?? 'http://localhost:4000';
 
@@ -8,14 +9,15 @@ const BASE = process.env.INDEXER_API ?? 'http://localhost:4000';
  * `revalidate` (seconds) opts the request into Next's data cache so SSR pages
  * don't hit the API on every request; omit it for uncached (no-store) fetches.
  */
-async function get<T>(path: string, revalidate?: number): Promise<T | null> {
+async function get<T>(path: string, isExpected: (value: unknown) => value is T, revalidate?: number): Promise<T | null> {
   try {
     const res = await fetch(
       `${BASE}${path}`,
       revalidate === undefined ? { cache: 'no-store' } : { next: { revalidate } },
     );
     if (!res.ok) return null;
-    return (await res.json()) as T;
+    const value: unknown = await res.json();
+    return isExpected(value) ? value : null;
   } catch {
     return null;
   }
@@ -23,12 +25,12 @@ async function get<T>(path: string, revalidate?: number): Promise<T | null> {
 
 export const apiBase = BASE;
 
-export const getHealth = () => get<Health>('/api/health', 60);
-export const getCommunities = (revalidate = 5) => get<{ communities: Community[] }>('/api/communities', revalidate);
+export const getHealth = () => get('/api/health', isHealth, 60);
+export const getCommunities = (revalidate = 5) => get('/api/communities', isCommunities, revalidate);
 export const getCommunity = (address: string, revalidate = 5) =>
-  get<Community>(`/api/communities/${encodeURIComponent(address)}`, revalidate);
-export const getPosts = (query = '', revalidate = 5) => get<PostPage>(`/api/posts${query}`, revalidate);
-export const getThread = (cid: string, revalidate = 5) => get<Thread>(`/api/posts/${encodeURIComponent(cid)}`, revalidate);
+  get(`/api/communities/${encodeURIComponent(address)}`, isCommunity, revalidate);
+export const getPosts = (query = '', revalidate = 5) => get(`/api/posts${query}`, isPostPage, revalidate);
+export const getThread = (cid: string, revalidate = 5) => get(`/api/posts/${encodeURIComponent(cid)}`, isThread, revalidate);
 export type SearchStatus = 'all' | 'active' | 'archived';
 
 // `nsfw` is always sent: the API excludes NSFW when the parameter is absent, so
@@ -39,7 +41,7 @@ export const search = (q: string, { community, page = 1, limit = 25, status = 'a
 } = {}) => {
   const params = new URLSearchParams({ q, nsfw: String(showNsfw), page: String(page), limit: String(limit), status });
   if (community) params.set('community', community);
-  return get<SearchResult>(`/api/search?${params}`);
+  return get(`/api/search?${params}`, isSearchResult);
 };
 
 /** The API caps a page at this many posts. */
@@ -57,8 +59,9 @@ export async function boardPage(
   perPage: number,
   revalidate = 5,
 ): Promise<{ posts: Comment[]; total: number } | null> {
-  if (boards.length === 1) {
-    const res = await getPosts(`?community=${encodeURIComponent(boards[0])}&sort=new&limit=${perPage}&page=${page}`, revalidate);
+  const [onlyBoard] = boards;
+  if (boards.length === 1 && onlyBoard !== undefined) {
+    const res = await getPosts(`?community=${encodeURIComponent(onlyBoard)}&sort=new&limit=${perPage}&page=${page}`, revalidate);
     return res ? { posts: res.posts, total: res.total } : null;
   }
 

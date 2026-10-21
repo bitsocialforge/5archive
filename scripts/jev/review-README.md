@@ -4,14 +4,14 @@ Use this optional development tool for rules that ordinary linters cannot establ
 
 ```sh
 # Explicit tracked files only; no credentials or network unless --live is added.
-node scripts/jev/review.mjs --base HEAD --files src/example.ts,docs/example.md
-node scripts/jev/review.mjs --base HEAD --files src/example.ts --live
+node --experimental-strip-types scripts/jev/review.mts --base HEAD --files src/example.ts,docs/example.md
+node --experimental-strip-types scripts/jev/review.mts --base HEAD --files src/example.ts --live
 
 # A task-owned JSON patch bundle also supports deleted/new files and explicit context.
-node scripts/jev/review.mjs --input /private/path/selected-patches.json --live --max-requests 10 --max-cost-usd 0.01
+node --experimental-strip-types scripts/jev/review.mts --input /private/path/selected-patches.json --live --max-requests 10 --max-cost-usd 0.01
 
 # Synthetic labeled pilot; omit --live for offline validation.
-node scripts/jev/review.mjs --input scripts/jev/fixtures/review.json --live --max-requests 12 --max-cost-usd 0.01
+node --experimental-strip-types scripts/jev/review.mts --input scripts/jev/fixtures/review.json --live --max-requests 12 --max-cost-usd 0.01
 ```
 
 Paths are repository-relative and literal, including names containing Git pathspec metacharacters. `--base` compares a verified commit to the working tree, including staged and unstaged changes. The explicit file list is never widened. Git collection refuses symlinks, untracked/missing files, credential paths, unsupported extensions, and excessive input. For patch input, use `{ "version": 1, "items": [{ "id": "example", "path": "src/example.ts", "diff": "+changed code", "context": "Relevant surrounding behavior" }] }`. Optional per-item `rules` limits rule IDs. Optional `expected` labels stay local and produce evaluation metrics; do not include private content or secrets in patches/context. Common credential patterns are rejected, but this is not a comprehensive secret scanner.

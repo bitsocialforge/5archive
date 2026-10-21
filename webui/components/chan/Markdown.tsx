@@ -83,12 +83,15 @@ function tokenize(text: string, parseSpoilers: boolean): Token[] {
   for (const match of text.matchAll(regex)) {
     const start = match.index ?? 0;
     if (start > last) tokens.push({ type: 'text', value: text.slice(last, start) });
+    const markdownText = match[4 + offset];
+    const markdownUrl = match[5 + offset];
+    const crossBoard = match[6 + offset];
     if (parseSpoilers && match[1] !== undefined) {
       tokens.push({ type: 'spoiler', tokens: tokenize(match[2] ?? '', false) });
-    } else if (match[3 + offset] !== undefined) {
-      tokens.push({ type: 'markdownLink', text: match[4 + offset], href: match[5 + offset] });
-    } else if (match[6 + offset] !== undefined) {
-      tokens.push({ type: 'crossBoardLink', display: match[6 + offset], route: crossBoardRoute(match[6 + offset]) });
+    } else if (match[3 + offset] !== undefined && markdownText !== undefined && markdownUrl !== undefined) {
+      tokens.push({ type: 'markdownLink', text: markdownText, href: markdownUrl });
+    } else if (crossBoard !== undefined) {
+      tokens.push({ type: 'crossBoardLink', display: crossBoard, route: crossBoardRoute(crossBoard) });
     } else if (match[8 + offset] !== undefined) {
       tokens.push({ type: 'quoteLink', number: Number(match[9 + offset]) });
     } else {

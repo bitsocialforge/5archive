@@ -3,10 +3,10 @@
 This developer helper suggests severity and a human investigation category for **explicitly selected, already sanitized** messages. It never reads service logs automatically, suppresses alerts, restarts services, sends notifications, or changes runtime settings. Use original evidence and ordinary diagnosis to verify every suggestion.
 
 ```bash
-node scripts/jev/triage.mjs --input scripts/jev/fixtures/triage.json
-node --test scripts/jev/tests/triage.test.mjs
+node --experimental-strip-types scripts/jev/triage.mts --input scripts/jev/fixtures/triage.json
+node --experimental-strip-types --test scripts/jev/tests/triage.test.mts
 # Intentional paid API calls; uses the existing private machine configuration:
-node scripts/jev/triage.mjs --input scripts/jev/fixtures/triage.json \
+node --experimental-strip-types scripts/jev/triage.mts --input scripts/jev/fixtures/triage.json \
   --live --max-requests 10 --max-cost-usd 0.01 > /private/triage-report.json
 ```
 
@@ -44,4 +44,4 @@ This follows the current TypeSafe [Choice guidance](https://docs.typesafe.ai/pri
 
 ## Repository scope
 
-This archive is a web UI backed by the indexer API. `webui/lib/api.ts` returns null on failed fetches; there is no new per-request failure log to consume here. Startup scripts report optional browser/portless problems, and `scripts/build-communities.mjs` reports directory-input failures. Select sanitized, independently observed summaries from those surfaces or the upstream indexer; do not infer a backend incident merely from empty UI data. No telemetry or ingestion service is added.
+This archive is a web UI backed by the indexer API. `webui/lib/api.ts` returns null on failed fetches; there is no new per-request failure log to consume here. Startup scripts report optional browser/portless problems, and `scripts/build-communities.mts` reports directory-input failures. Select sanitized, independently observed summaries from those surfaces or the upstream indexer; do not infer a backend incident merely from empty UI data. No telemetry or ingestion service is added.

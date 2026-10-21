@@ -187,7 +187,7 @@ and, where noted, restart.
 
 | What changed | Do |
 |--------------|----|
-| Board list (5chan directories) | `node scripts/build-communities.mjs`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'`. The same run rewrites `webui/lib/directories.json` (the directory-code URL map) — commit it and redeploy the web UI |
+| Board list (5chan directories) | `node --experimental-strip-types scripts/build-communities.mts`, `scp -r config root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose restart server'`. The same run rewrites `webui/lib/directories.json` (the directory-code URL map) — commit it and redeploy the web UI |
 | Takedown blocklist | Edit `config/blocklist.json` (see README), then `scp config/blocklist.json root@91.234.199.189:/opt/5archive/config/` — the engine watches the file and applies it within ~a minute, **no restart** |
 | NSFW overrides | Edit `config/nsfw-overrides.json` (JSON array, `[]` when empty), then `scp config/nsfw-overrides.json root@91.234.199.189:/opt/5archive/config/` — watched like the blocklist, **no restart** |
 | Engine (server) | Bump the `image:` tag in `docker-compose.yml` to the [release](https://github.com/bitsocialnet/bitsocial-indexer/tags) you want and commit, `scp docker-compose.yml root@91.234.199.189:/opt/5archive/`, then `ssh root@91.234.199.189 'cd /opt/5archive && docker compose pull && docker compose up -d'`. `docker compose images` confirms the running tag. The image is public — no `docker login` on the VPS |

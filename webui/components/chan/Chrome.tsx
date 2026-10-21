@@ -81,7 +81,8 @@ function pageList(current: number, total: number): (number | null)[] {
   const sorted = [...pages].sort((a, b) => a - b);
   const out: (number | null)[] = [];
   for (const [i, p] of sorted.entries()) {
-    if (i > 0 && p - sorted[i - 1] > 1) out.push(null);
+    const previous = sorted[i - 1];
+    if (previous !== undefined && p - previous > 1) out.push(null);
     out.push(p);
   }
   return out;

@@ -6,14 +6,14 @@ The explicit benchmark runner compares against a trusted, retained pre-change re
 
 ```sh
 # Validate only; no browser, credential discovery, or inference.
-node scripts/jev/browser-benchmark.mjs --plan /task/theme.json --baseline-root /task/old-repo
+node --experimental-strip-types scripts/jev/browser-benchmark.mts --plan /task/theme.json --baseline-root /task/old-repo
 
 # Actual browsers, zero model calls. Reuse an explicitly started local server.
-node scripts/jev/browser-benchmark.mjs --plan /task/theme.json --plan /task/search.json \
+node --experimental-strip-types scripts/jev/browser-benchmark.mts --plan /task/theme.json --plan /task/search.json \
   --baseline-root /task/old-repo --live --samples 3 --warmups 1 --evidence real-app
 
 # Separately measure the budgeted model path using the same plans.
-node scripts/jev/browser-benchmark.mjs --plan /task/theme.json \
+node --experimental-strip-types scripts/jev/browser-benchmark.mts --plan /task/theme.json \
   --baseline-root /task/old-repo --live --jev --samples 1 --warmups 0 \
   --evidence real-app --max-requests 20 --max-cost-usd 0.005
 ```

@@ -71,8 +71,8 @@ Two deployments:
 | `webui/lib/directories.json` | Directory code → boards + title, the web UI's URL map (generated, don't hand-edit) |
 | `config/blocklist.json` | Takedown blocklist — CIDs redacted from the archive (see below) |
 | `config/nsfw-overrides.json` | Operator NSFW overrides — per-board verdicts that outrank every other NSFW signal (see `DEPLOY.md`) |
-| `scripts/build-communities.mjs` | Regenerates both generated files from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
-| `scripts/directory-history.mjs` | Keeps every board a code has ever listed in `directories.json` (`former`), so thread URLs never move |
+| `scripts/build-communities.mts` | Regenerates both generated files from [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists) |
+| `scripts/directory-history.mts` | Keeps every board a code has ever listed in `directories.json` (`former`), so thread URLs never move |
 | `.env.example` | Documents every env var; real `.env` lives only on the VPS |
 | `DEPLOY.md` | Full runbook: VPS, Caddy, Cloudflare DNS, Vercel |
 
@@ -97,7 +97,7 @@ its board, and a thread URL survives rotations. The code → boards map is
 [`bitsocialnet/lists`](https://github.com/bitsocialnet/lists). It only grows: a
 board that leaves a code's list stays mapped to the code (`former`), so its
 threads never change URL however often the code changes hands
-(`scripts/directory-history.mjs`).
+(`scripts/directory-history.mts`).
 
 The pre-directory URLs (`/p/<address>`, `/c/<cid>`) permanently redirect to the
 new ones. The address of a code's only board redirects to the code. A board
@@ -193,7 +193,7 @@ See **[DEPLOY.md](DEPLOY.md)** for the complete runbook. The short version:
 
 ```bash
 # Generate the 5chan board list and the directory-code URL map
-node scripts/build-communities.mjs      # config/communities.json + webui/lib/directories.json
+node --experimental-strip-types scripts/build-communities.mts      # config/communities.json + webui/lib/directories.json
 
 # VPS (api.5archive.org): scp docker-compose.yml and config/ to /opt/5archive,
 # create .env, then pull the pinned engine image and start it
@@ -206,13 +206,13 @@ cd webui && vercel deploy --prod --yes
 ## Maintenance
 
 - **Refresh the board list** when 5chan directories change:
-  `node scripts/build-communities.mjs`, scp `config/` to the VPS, then
+  `node --experimental-strip-types scripts/build-communities.mts`, scp `config/` to the VPS, then
   `docker compose restart server`. The same run updates
   `webui/lib/directories.json` — commit it and redeploy the web UI so new or
   rotated directory codes resolve. Boards that left a code's list stay in that
   file as `former` (never delete them by hand: their thread URLs depend on it);
   the crawl set in `config/communities.json` follows the current lists only.
-  `node --test scripts/directory-history.test.mjs` covers the merge.
+  `node --experimental-strip-types --test --test-concurrency=1 scripts/directory-history.test.mts` covers the merge.
 - **Update the engine (API/crawler):** bump the `image:` tag in
   `docker-compose.yml` to the `bitsocial-indexer` release you want, scp the
   file to the VPS, then `docker compose pull && docker compose up -d`. The tag

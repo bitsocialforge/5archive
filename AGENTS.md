@@ -20,7 +20,7 @@ Default scenarios use isolated development output in `.next-perf-dev`; their cou
 
 `npm run build:profile` builds `.next-perf` with Next's `reactProductionProfiling` and `NEXT_PUBLIC_REACT_PERF=1`. `npm run start:profile -- --port 3100` serves it. Normal `npm run build`/`npm start` continue using `.next` and exclude the collector and Profiler wrapper; never deploy `.next-perf` as the ordinary production artifact.
 
-For deterministic profiling against an existing server, first run `node scripts/react-perf/fixture-api.mjs` in an owned terminal and use its printed `INDEXER_API` value for both `build:profile` and `start:profile`. Then run `npm run perf:record -- --url http://127.0.0.1:3100 --scenario populated-navigation`. An existing server must already use the same fixture contract. The runner does not stop an externally supplied server; stop only the server and fixture terminal you own afterward. A normal production preview can measure page performance but lacks the collector/React timing evidence required by these checks.
+For deterministic profiling against an existing server, first run `node --experimental-strip-types scripts/react-perf/fixture-api.mts` in an owned terminal and use its printed `INDEXER_API` value for both `build:profile` and `start:profile`. Then run `npm run perf:record -- --url http://127.0.0.1:3100 --scenario populated-navigation`. An existing server must already use the same fixture contract. The runner does not stop an externally supplied server; stop only the server and fixture terminal you own afterward. A normal production preview can measure page performance but lacks the collector/React timing evidence required by these checks.
 
 ## Visual feedback
 
@@ -32,7 +32,7 @@ After a bug fix or substantive review correction exposes a preventable mistake, 
 
 ## Optional Jev browser checks
 
-`scripts/jev/README.md` documents an opt-in bounded browser helper using the installed Playwright CLI and existing machine-wide session lock. Supply the fixture-backed web UI URL, an explicit allowed-action plan, and deterministic completion assertions. Offline plan validation needs no credentials; live semantic choices require explicit `--live`, a pinned model, and a budget. Helpers automatically discover credentials and the default model from the private machine config described in that README, with environment overrides; `node scripts/jev/config.mjs --check` checks readiness without network calls. Offline validation does not read the config or key file. Keep generated evidence outside Git. Use existing deterministic scenarios for fixed navigation/search and Bippy for performance; model judgments do not replace those checks.
+`scripts/jev/README.md` documents an opt-in bounded browser helper using the installed Playwright CLI and existing machine-wide session lock. Supply the fixture-backed web UI URL, an explicit allowed-action plan, and deterministic completion assertions. Offline plan validation needs no credentials; live semantic choices require explicit `--live`, a pinned model, and a budget. Helpers automatically discover credentials and the default model from the private machine config described in that README, with environment overrides; `node --experimental-strip-types scripts/jev/config.mts --check` checks readiness without network calls. Offline validation does not read the config or key file. Keep generated evidence outside Git. Use existing deterministic scenarios for fixed navigation/search and Bippy for performance; model judgments do not replace those checks.
 
 ## Optional screenshot checks
 
@@ -40,6 +40,6 @@ For visible layout or screenshot-only criteria, use [optional screenshot checks]
 
 ## Optional Jev semantic review
 
-For an explicitly selected code or documentation diff, use `scripts/jev/review-README.md`. The bounded helper is opt-in, uses the private machine configuration only with `--live`, and produces advisory issues or uncertainty. Keep ordinary linting, tests, and independent review authoritative; do not add automatic edit, commit, or repair hooks. Offline checks run with `node --test scripts/jev/tests/*.test.mjs`.
+For an explicitly selected code or documentation diff, use `scripts/jev/review-README.md`. The bounded helper is opt-in, uses the private machine configuration only with `--live`, and produces advisory issues or uncertainty. Keep ordinary linting, tests, and independent review authoritative; do not add automatic edit, commit, or repair hooks. Offline checks run with `node --experimental-strip-types --test --test-concurrency=1 scripts/jev/tests/*.test.mts`.
 
 For investigation of recurring backend failures, `scripts/jev/triage-README.md` covers an opt-in experiment on explicitly sanitized event groups; keep deterministic alerts and original evidence. For labeled, already filtered FTS shortlists, `scripts/jev/rerank-README.md` covers page-local reranking with original-order fallback; application search remains unchanged. Both tools require explicit live invocation for provider calls and are not service integrations.

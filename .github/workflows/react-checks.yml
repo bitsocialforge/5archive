@@ -39,9 +39,9 @@ jobs:
         run: |
           # Ubuntu 24.04 restricts user namespaces for downloaded browser binaries.
           # Scope the exception to this exact executable; keep Chromium sandboxing enabled.
-          chromium_path=$(node --input-type=module <<'NODE'
+          chromium_path=$(node --experimental-strip-types --input-type=module <<'NODE'
           import { realpathSync } from 'node:fs';
-          import { browserDriver } from './scripts/react-perf/browser.mjs';
+          import { browserDriver } from './scripts/react-perf/browser.mts';
           const executable = realpathSync(browserDriver().chromium.executablePath());
           if (!/^\/[a-zA-Z0-9_./-]+$/.test(executable)) throw new Error('Unexpected character in Chromium profile path');
           console.log(executable);
@@ -64,6 +64,8 @@ jobs:
           npm run doctor:check
       - name: Type check
         run: npm run typecheck
+      - name: Offline TypeScript script tests
+        run: npm run test:scripts
       - name: Collector compatibility and deterministic application scenarios
         run: npm run perf:check -- --output .react-perf/ci
       - name: Normal production build

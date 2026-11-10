@@ -1,5 +1,5 @@
 import { notFound, permanentRedirect } from 'next/navigation';
-import { getThread } from '@/lib/api';
+import { findThread } from '@/lib/api';
 import { threadPath } from '@/lib/directories';
 
 // Legacy URL: threads moved from /c/<cid> to /<dir>/thread/<cid>. Kept as a
@@ -11,7 +11,7 @@ type Params = { params: Promise<{ cid: string }> };
 
 export default async function LegacyThreadPage({ params }: Params) {
   const { cid } = await params;
-  const thread = await getThread(decodeURIComponent(cid));
+  const thread = await findThread(decodeURIComponent(cid));
 
   if (!thread) notFound();
   permanentRedirect(threadPath(thread.post));

@@ -10,7 +10,8 @@ const wrapper = path.join(path.dirname(fileURLToPath(import.meta.url)), 'pw-sess
 
 // A stand-in for playwright-cli. Like the real CLI, `open` lists the session as
 // open only once its browser has finished launching (launch-seconds), and
-// `close` stops the browser before the command returns (close-seconds).
+// `close` stops the browser before the command returns (close-seconds). The
+// launching-<session> marker shows that a launch has begun.
 const FAKE_CLI = `#!/bin/bash
 dir="$(dirname "$0")"
 if [ "\${1:-}" = list ]; then
@@ -24,6 +25,7 @@ fi
 session="\${1#-s=}"
 case "\${2:-}" in
   open)
+    : >"$dir/launching-$session"
     sleep "$(cat "$dir/launch-seconds")" </dev/null >/dev/null 2>&1
     : >"$dir/open-$session"
     ;;
@@ -146,4 +148,19 @@ test('a stale slot is still reclaimed once its opener and browser are gone', () 
   assert.equal(second.code, 0, second.output);
   assert.match(second.output, /reclaimed stale slot from 'first'/);
   assert.equal(owner(), 'second');
+});
+
+test('killing the wrapper during launch stops the launch and frees the slot', async () => {
+  writeFileSync(path.join(dir, 'launch-seconds'), '1');
+  const opening = start('open', 'first', 'about:blank');
+  await until(() => existsSync(path.join(dir, 'launching-first')), 'the browser launch to begin');
+  // execFile's timeout signals only the wrapper process, not its children.
+  opening.child.kill('SIGTERM');
+  assert.notEqual((await opening.exited).code, 0);
+  // The Jev driver and perf runner then run their normal cleanup.
+  assert.equal(run('close', 'first').code, 0);
+
+  await sleep(1500);
+  assert.equal(browserOpen('first'), false, 'the cancelled launch left a browser running');
+  assert.equal(existsSync(lock()), false);
 });

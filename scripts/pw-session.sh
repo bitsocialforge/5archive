@@ -309,12 +309,40 @@ case "$command" in
     fi
 
     acquire "$session" "$wait_seconds"
+
+    # A signal here (an execFile timeout, Ctrl-C) would otherwise kill only this
+    # wrapper and leave playwright-cli launching a browser after the caller's
+    # cleanup released the slot. Forward it, close whatever already started,
+    # then release.
+    opener=''
+    cancel_open() {
+      trap '' INT TERM HUP
+      if [ -n "$opener" ]; then
+        kill -TERM "$opener" 2>/dev/null || true
+        wait "$opener" 2>/dev/null || true
+        "$playwright_cli" -s="$session" close >/dev/null 2>&1 || true
+      fi
+      if [ "$(current_owner)" = "$session" ]; then
+        release "$session" || true
+      fi
+      exit "$1"
+    }
+    trap 'cancel_open 129' HUP
+    trap 'cancel_open 130' INT
+    trap 'cancel_open 143' TERM
+
     # Guarded expansion: Bash 3.2 (macOS /bin/bash) errors on an empty array
-    # under `set -u`.
-    if ! "$playwright_cli" -s="$session" open ${open_args[@]+"${open_args[@]}"}; then
+    # under `set -u`. Run in the background so a trapped signal interrupts the
+    # wait instead of being deferred until the launch finishes.
+    "$playwright_cli" -s="$session" open ${open_args[@]+"${open_args[@]}"} &
+    opener=$!
+    if ! wait "$opener"; then
+      opener=''
       release "$session"
       exit 1
     fi
+    opener=''
+    trap - HUP INT TERM
     # The browser is listed as open now, so this wrapper's PID no longer needs to
     # hold the slot (and a reused PID cannot keep a stale lock alive).
     if [ "$(current_owner)" = "$session" ]; then

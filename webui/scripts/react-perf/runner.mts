@@ -46,8 +46,10 @@ await mkdir(output, { recursive: true, mode: 0o700 });
 const report: Report = { schemaVersion: 1, command, cpu, samples, viewport: { width: 1280, height: 900 }, output, startedAt: new Date().toISOString(), cases: [], ok: false };
 const abort = new AbortController();
 const interrupt = () => abort.abort(new Error('Profiling interrupted'));
-process.once('SIGINT', interrupt);
-process.once('SIGTERM', interrupt);
+// Not `once`: a repeated signal must not fall back to Node's default exit while
+// the owned browser, slot lock and server are still being cleaned up.
+process.on('SIGINT', interrupt);
+process.on('SIGTERM', interrupt);
 const safeName = (name: string) => name.replace(/[^a-z0-9._-]/gi, '-');
 
 async function runCase(browser: Browser, target: Target, scenario: Scenario, origin: string, sample: number) {
@@ -81,6 +83,11 @@ async function runCase(browser: Browser, target: Target, scenario: Scenario, ori
     rejectCrash(error);
   };
   page.on('crash', onCrash);
+  // An interrupt ends the case now, not after a pending navigation or action
+  // times out: the finally blocks below and in the caller own the cleanup.
+  const onAbort = () => rejectCrash(abort.signal.reason instanceof Error ? abort.signal.reason : new Error('Profiling interrupted'));
+  if (abort.signal.aborted) onAbort();
+  else abort.signal.addEventListener('abort', onAbort, { once: true });
   const tracePath = path.join(output, `${safeName(target.name)}-${safeName(scenario.name)}-${sample}.json.gz`);
   const measure: Measure = async (name, action, budgets, settings = {}) => {
     abort.signal.throwIfAborted();
@@ -191,6 +198,7 @@ async function runCase(browser: Browser, target: Target, scenario: Scenario, ori
       abort.abort(error);
     } finally {
       page.off('crash', onCrash);
+      abort.signal.removeEventListener('abort', onAbort);
     }
   }
   // A crashed/disconnected browser must never run the next sample or scenario.

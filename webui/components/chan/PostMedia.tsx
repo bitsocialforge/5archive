@@ -37,9 +37,12 @@ const hostOf = (url: string) => {
   }
 };
 
-/** 5chan's MediaLoadFailure: archived links rot, and the archive hosts no copies. */
-function MediaLoadFailure({ url, compact }: { url: string; compact: boolean }) {
-  const host = hostOf(url);
+/**
+ * 5chan's MediaLoadFailure: archived links rot, and the archive hosts no copies.
+ * `source` is the image that failed (the thumbnail), `url` the media it previews.
+ */
+function MediaLoadFailure({ url, source, compact }: { url: string; source: string; compact: boolean }) {
+  const host = hostOf(source);
   const status = host ? `External image from ${host} failed to load.` : 'External image failed to load.';
   return compact ? (
     // eslint-disable-next-line @next/next/no-img-element -- 5chan's pixel placeholder
@@ -167,12 +170,18 @@ function ThumbnailBox({
   const mobile = variant === 'mobile';
   const box = (
     <span className={mobile ? `${media.thumbnailSmall} ${media.thumbnailMobile}` : `${media.thumbnailBig} ${media.thumbnail}`} style={dimensions}>
-      {failed ? (
+      {failed && !mobile ? (
         // Not inside the link: the card carries its own "Open original file" link.
-        <MediaLoadFailure url={info.url} compact={mobile} />
+        <MediaLoadFailure url={info.url} source={info.thumbnail ?? info.url} compact={false} />
       ) : (
+        // Mobile has no file line, so only this link opens or expands the media,
+        // even once its thumbnail has failed.
         <a href={info.url} target="_blank" rel="noopener noreferrer nofollow" className={media.mediaToggleButton} aria-label={label} onClick={onClick}>
-          <ThumbnailContent info={info} spoiler={spoiler} onFail={onFail} />
+          {failed ? (
+            <MediaLoadFailure url={info.url} source={info.thumbnail ?? info.url} compact />
+          ) : (
+            <ThumbnailContent info={info} spoiler={spoiler} onFail={onFail} />
+          )}
         </a>
       )}
     </span>

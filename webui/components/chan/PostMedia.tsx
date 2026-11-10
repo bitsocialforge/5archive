@@ -56,8 +56,22 @@ function MediaLoadFailure({ url, compact }: { url: string; compact: boolean }) {
   );
 }
 
-/** The media itself, once a thumbnail is clicked: 5chan's expanded image, video or embed. */
-function ExpandedMedia({ info, variant, onCollapse }: { info: MediaInfo; variant: MediaVariant; onCollapse: (event: MouseEvent) => void }) {
+/**
+ * The media itself, once a thumbnail is clicked: 5chan's expanded image, video
+ * or embed. `onClose` adds 5chan's mobile close control, for media that cannot
+ * be collapsed by clicking it when no file line carries a [close] link.
+ */
+function ExpandedMedia({
+  info,
+  variant,
+  onCollapse,
+  onClose,
+}: {
+  info: MediaInfo;
+  variant: MediaVariant;
+  onCollapse: (event: MouseEvent) => void;
+  onClose?: () => void;
+}) {
   const mediaClass = variant === 'mobile' ? media.mediaMobile : variant === 'reply' ? media.mediaDesktopReply : media.mediaDesktopOp;
   let content: ReactNode;
   if (info.type === 'video') {
@@ -82,7 +96,18 @@ function ExpandedMedia({ info, variant, onCollapse }: { info: MediaInfo; variant
       </a>
     );
   }
-  return <span className={`${mediaClass} ${media.removeFloat}`}>{content}</span>;
+  return (
+    <span className={`${mediaClass} ${media.removeFloat}`}>
+      {content}
+      {onClose ? (
+        <div className={media.closeButton}>
+          <button type="button" className="button" onClick={onClose}>
+            close
+          </button>
+        </div>
+      ) : null}
+    </span>
+  );
 }
 
 /** What the thumbnail link shows: the spoiler card, a video's first frame, or the image. */
@@ -165,6 +190,9 @@ export function PostMedia({ media: info, size, variant, spoiler, fileText, mobil
   const [expanded, setExpanded] = useState(false);
   const expandable = info.type !== 'webpage' && info.type !== 'audio';
   const hasThumbnail = spoiler || Boolean(info.thumbnail) || info.type === 'video';
+  // Video and embeds take their own clicks, so they collapse through a [close]
+  // control: in the file line on desktop, under the media on mobile.
+  const close = expanded && (info.type === 'video' || info.type === 'youtube') ? () => setExpanded(false) : undefined;
   const toggle = (event: MouseEvent) => {
     if (!expandable || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
     event.preventDefault();
@@ -175,15 +203,14 @@ export function PostMedia({ media: info, size, variant, spoiler, fileText, mobil
   if (info.type === 'audio') {
     body = <audio src={info.url} controls preload="none" />;
   } else if (expanded) {
-    body = <ExpandedMedia info={info} variant={variant} onCollapse={toggle} />;
+    body = <ExpandedMedia info={info} variant={variant} onCollapse={toggle} onClose={fileText ? undefined : close} />;
   } else if (hasThumbnail) {
     body = <ThumbnailBox info={info} size={size} variant={variant} spoiler={spoiler} label={expandable ? 'Expand media' : 'Open link'} onClick={toggle} mobileInfo={mobileInfo} />;
   }
 
-  const canCollapse = expanded && (info.type === 'video' || info.type === 'youtube');
   return (
     <>
-      {fileText ? <FileText info={info} fileText={fileText} spoiler={spoiler} onClose={canCollapse ? () => setExpanded(false) : undefined} /> : null}
+      {fileText ? <FileText info={info} fileText={fileText} spoiler={spoiler} onClose={close} /> : null}
       {body ? (
         <div>
           <span className={media.content}>{body}</span>

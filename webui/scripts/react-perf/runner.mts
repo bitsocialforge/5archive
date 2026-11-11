@@ -52,6 +52,19 @@ process.on('SIGINT', interrupt);
 process.on('SIGTERM', interrupt);
 const safeName = (name: string) => name.replace(/[^a-z0-9._-]/gi, '-');
 
+// Ends a phase that does not watch the abort signal itself (the compatibility
+// self-test) as soon as the run is interrupted, so the caller's cleanup closes
+// the browser now. The abandoned work then fails on the closed browser.
+function untilAborted<T>(work: Promise<T>): Promise<T> {
+  void work.catch(() => {});
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(abort.signal.reason);
+    if (abort.signal.aborted) return onAbort();
+    abort.signal.addEventListener('abort', onAbort, { once: true });
+    work.then(resolve, reject).finally(() => abort.signal.removeEventListener('abort', onAbort));
+  });
+}
+
 async function runCase(browser: Browser, target: Target, scenario: Scenario, origin: string, sample: number) {
   abort.signal.throwIfAborted();
   const context = await bounded(browser.newContext({ viewport: report.viewport }), 'Case context creation');
@@ -210,7 +223,7 @@ try {
     report.browser = await browser.version();
     if (command === 'selftest' || command === 'check') {
       process.stderr.write('[perf] Validating collector against React compatibility fixtures\n');
-      report.selftest = await runSelftest(browser, packageRoot);
+      report.selftest = await untilAborted(runSelftest(browser, packageRoot));
       if (command === 'selftest') return;
     }
     const config = (await import('./config.mts')).default;

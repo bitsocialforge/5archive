@@ -53,8 +53,9 @@ process.on('SIGTERM', interrupt);
 const safeName = (name: string) => name.replace(/[^a-z0-9._-]/gi, '-');
 
 // Ends a phase that does not watch the abort signal itself (the compatibility
-// self-test) as soon as the run is interrupted, so the caller's cleanup closes
-// the browser now. The abandoned work then fails on the closed browser.
+// self-test, case setup) as soon as the run is interrupted, so the caller's
+// cleanup closes the browser now. The abandoned work then fails on the closed
+// browser, and anything it created, such as a late context, closes with it.
 function untilAborted<T>(work: Promise<T>): Promise<T> {
   void work.catch(() => {});
   return new Promise<T>((resolve, reject) => {
@@ -67,15 +68,15 @@ function untilAborted<T>(work: Promise<T>): Promise<T> {
 
 async function runCase(browser: Browser, target: Target, scenario: Scenario, origin: string, sample: number) {
   abort.signal.throwIfAborted();
-  const context = await bounded(browser.newContext({ viewport: report.viewport }), 'Case context creation');
-  const page = await bounded(context.newPage(), 'Case page creation');
+  const context = await untilAborted(bounded(browser.newContext({ viewport: report.viewport }), 'Case context creation'));
+  const page = await untilAborted(bounded(context.newPage(), 'Case page creation'));
   page.setDefaultTimeout(30000);
-  const cdp = await bounded(context.newCDPSession(page), 'Case CDP session creation');
-  await bounded(cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu }), 'CPU throttling setup');
-  await context.addInitScript(() => {
+  const cdp = await untilAborted(bounded(context.newCDPSession(page), 'Case CDP session creation'));
+  await untilAborted(bounded(cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu }), 'CPU throttling setup'));
+  await untilAborted(context.addInitScript(() => {
     window.__PROFILING__ = true;
     window.__NO_DEV_TOOLBAR__ = true;
-  });
+  }));
   const result: CaseResult = { target: target.name, scenario: scenario.name, sample, phases: [], consoleErrors: [] };
   report.cases.push(result);
   page.on('pageerror', (error) => {

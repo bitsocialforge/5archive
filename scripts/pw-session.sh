@@ -313,13 +313,18 @@ case "$command" in
     # A signal here (an execFile timeout, Ctrl-C) would otherwise kill only this
     # wrapper and leave playwright-cli launching a browser after the caller's
     # cleanup released the slot. Forward it, close whatever already started,
-    # then release.
+    # then release. `launched` stays set from just before the launch until the
+    # traps are removed, so a signal that lands after a successful launch still
+    # closes the browser it is about to release the slot for.
     opener=''
+    launched=''
     cancel_open() {
       trap '' INT TERM HUP
       if [ -n "$opener" ]; then
         kill -TERM "$opener" 2>/dev/null || true
         wait "$opener" 2>/dev/null || true
+      fi
+      if [ -n "$launched" ]; then
         "$playwright_cli" -s="$session" close >/dev/null 2>&1 || true
       fi
       if [ "$(current_owner)" = "$session" ]; then
@@ -334,6 +339,7 @@ case "$command" in
     # Guarded expansion: Bash 3.2 (macOS /bin/bash) errors on an empty array
     # under `set -u`. Run in the background so a trapped signal interrupts the
     # wait instead of being deferred until the launch finishes.
+    launched=1
     "$playwright_cli" -s="$session" open ${open_args[@]+"${open_args[@]}"} &
     opener=$!
     if ! wait "$opener"; then

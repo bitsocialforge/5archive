@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { getCommunities, getCommunity, getHealth, getPosts, getThread, search } from '../lib/api.ts';
+import {
+  findCommunity, findThread, getCommunities, getCommunity, getHealth, getPosts, getThread, loadCommunities, loadPosts, search,
+} from '../lib/api.ts';
 import { isComment, isCommunity, isHealth, isPostPage, isSearchResult, isThread } from '../lib/api-contract.ts';
 import type { Comment, Community } from '../lib/types.ts';
 
@@ -83,4 +85,36 @@ test('keeps the null fallback for HTTP, JSON and transport failures', async (t) 
   assert.equal(await getPosts(), null);
   fetchMock.mock.mockImplementation(async () => { throw new Error('offline'); });
   assert.equal(await getPosts(), null);
+});
+
+// Thread, legacy, ad-hoc board and sitemap routes answer 404 or list nothing on
+// null, so an outage must never read as a missing record.
+test('strict lookups tell a missing record from an unavailable indexer', async (t) => {
+  const fetchMock = t.mock.method(globalThis, 'fetch', async () => Response.json({ error: 'post not found' }, { status: 404 }));
+  assert.equal(await findThread('missing'), null);
+  assert.equal(await findCommunity('missing.bso'), null);
+  // A listing endpoint always exists: its 404 is a misconfigured API, not an empty archive.
+  await assert.rejects(loadCommunities());
+  await assert.rejects(loadPosts('?community=missing.bso'));
+
+  const outages: (() => Promise<Response>)[] = [
+    async () => new Response('{}', { status: 503 }),
+    async () => new Response('{}', { status: 500 }),
+    async () => new Response('not JSON'),
+    async () => Response.json({ error: 'unexpected successful response' }),
+    async () => { throw new TypeError('fetch failed'); },
+  ];
+  for (const outage of outages) {
+    fetchMock.mock.mockImplementation(outage);
+    await assert.rejects(findThread('post-cid'));
+    await assert.rejects(findCommunity('community.bso'));
+    await assert.rejects(loadCommunities());
+    await assert.rejects(loadPosts());
+  }
+
+  fetchMock.mock.mockImplementation(async () => Response.json({ post, replies: [] }));
+  assert.deepEqual(await findThread('post-cid', 45), { post, replies: [] });
+  assert.deepEqual(fetchMock.mock.calls.at(-1)?.arguments[1], { next: { revalidate: 45 } });
+  fetchMock.mock.mockImplementation(async () => Response.json({ communities: [community] }));
+  assert.deepEqual(await loadCommunities(), { communities: [community] });
 });

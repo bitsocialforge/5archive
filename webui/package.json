@@ -38,6 +38,7 @@
     "@playwright/cli": "0.1.19",
     "bippy": "0.7.3",
     "esbuild": "0.28.2",
+    "modern-web-guidance": "1.0.0",
     "playwright": "1.63.0-alpha-2026-08-31"
   },
   "overrides": {

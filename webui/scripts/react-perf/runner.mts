@@ -46,21 +46,37 @@ await mkdir(output, { recursive: true, mode: 0o700 });
 const report: Report = { schemaVersion: 1, command, cpu, samples, viewport: { width: 1280, height: 900 }, output, startedAt: new Date().toISOString(), cases: [], ok: false };
 const abort = new AbortController();
 const interrupt = () => abort.abort(new Error('Profiling interrupted'));
-process.once('SIGINT', interrupt);
-process.once('SIGTERM', interrupt);
+// Not `once`: a repeated signal must not fall back to Node's default exit while
+// the owned browser, slot lock and server are still being cleaned up.
+process.on('SIGINT', interrupt);
+process.on('SIGTERM', interrupt);
 const safeName = (name: string) => name.replace(/[^a-z0-9._-]/gi, '-');
+
+// Ends a phase that does not watch the abort signal itself (the compatibility
+// self-test, case setup) as soon as the run is interrupted, so the caller's
+// cleanup closes the browser now. The abandoned work then fails on the closed
+// browser, and anything it created, such as a late context, closes with it.
+function untilAborted<T>(work: Promise<T>): Promise<T> {
+  void work.catch(() => {});
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(abort.signal.reason);
+    if (abort.signal.aborted) return onAbort();
+    abort.signal.addEventListener('abort', onAbort, { once: true });
+    work.then(resolve, reject).finally(() => abort.signal.removeEventListener('abort', onAbort));
+  });
+}
 
 async function runCase(browser: Browser, target: Target, scenario: Scenario, origin: string, sample: number) {
   abort.signal.throwIfAborted();
-  const context = await bounded(browser.newContext({ viewport: report.viewport }), 'Case context creation');
-  const page = await bounded(context.newPage(), 'Case page creation');
+  const context = await untilAborted(bounded(browser.newContext({ viewport: report.viewport }), 'Case context creation'));
+  const page = await untilAborted(bounded(context.newPage(), 'Case page creation'));
   page.setDefaultTimeout(30000);
-  const cdp = await bounded(context.newCDPSession(page), 'Case CDP session creation');
-  await bounded(cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu }), 'CPU throttling setup');
-  await context.addInitScript(() => {
+  const cdp = await untilAborted(bounded(context.newCDPSession(page), 'Case CDP session creation'));
+  await untilAborted(bounded(cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu }), 'CPU throttling setup'));
+  await untilAborted(context.addInitScript(() => {
     window.__PROFILING__ = true;
     window.__NO_DEV_TOOLBAR__ = true;
-  });
+  }));
   const result: CaseResult = { target: target.name, scenario: scenario.name, sample, phases: [], consoleErrors: [] };
   report.cases.push(result);
   page.on('pageerror', (error) => {
@@ -81,6 +97,11 @@ async function runCase(browser: Browser, target: Target, scenario: Scenario, ori
     rejectCrash(error);
   };
   page.on('crash', onCrash);
+  // An interrupt ends the case now, not after a pending navigation or action
+  // times out: the finally blocks below and in the caller own the cleanup.
+  const onAbort = () => rejectCrash(abort.signal.reason instanceof Error ? abort.signal.reason : new Error('Profiling interrupted'));
+  if (abort.signal.aborted) onAbort();
+  else abort.signal.addEventListener('abort', onAbort, { once: true });
   const tracePath = path.join(output, `${safeName(target.name)}-${safeName(scenario.name)}-${sample}.json.gz`);
   const measure: Measure = async (name, action, budgets, settings = {}) => {
     abort.signal.throwIfAborted();
@@ -191,6 +212,7 @@ async function runCase(browser: Browser, target: Target, scenario: Scenario, ori
       abort.abort(error);
     } finally {
       page.off('crash', onCrash);
+      abort.signal.removeEventListener('abort', onAbort);
     }
   }
   // A crashed/disconnected browser must never run the next sample or scenario.
@@ -202,7 +224,7 @@ try {
     report.browser = await browser.version();
     if (command === 'selftest' || command === 'check') {
       process.stderr.write('[perf] Validating collector against React compatibility fixtures\n');
-      report.selftest = await runSelftest(browser, packageRoot);
+      report.selftest = await untilAborted(runSelftest(browser, packageRoot));
       if (command === 'selftest') return;
     }
     const config = (await import('./config.mts')).default;

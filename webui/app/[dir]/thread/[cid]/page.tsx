@@ -12,7 +12,7 @@ import { JsonLd } from '@/components/JsonLd';
 import { AnchorScroll, ReplyTarget } from '@/components/ReplyTarget';
 import { isTombstone } from '@/components/Tombstone';
 import { UpstreamProvenance, UpstreamThreadEnd, UpstreamThreadForm } from '@/components/Upstream';
-import { getCommunity, getThread } from '@/lib/api';
+import { findThread, getCommunity } from '@/lib/api';
 import { archivedBoards, boardPath, directoryForAddress, segmentForAddress, threadPath } from '@/lib/directories';
 import { excerpt } from '@/lib/format';
 import { threadGraph } from '@/lib/jsonld';
@@ -38,7 +38,7 @@ function threadTitle(post: Comment): string {
  * A cid reached under the wrong directory segment redirects to its own board.
  */
 async function loadThread(cid: string): Promise<{ requestedPost: Comment; targetReplyCid?: string; thread: ThreadData } | null> {
-  const requestedThread = await getThread(cid);
+  const requestedThread = await findThread(cid);
   if (!requestedThread) return null;
 
   const requestedPost = requestedThread.post;
@@ -46,7 +46,7 @@ async function loadThread(cid: string): Promise<{ requestedPost: Comment; target
     return { requestedPost, thread: requestedThread };
   }
 
-  const rootThread = await getThread(requestedPost.post_cid);
+  const rootThread = await findThread(requestedPost.post_cid);
   if (!rootThread) return null;
 
   return { requestedPost, targetReplyCid: requestedPost.cid, thread: rootThread };

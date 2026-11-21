@@ -1,4 +1,4 @@
-import { getCommunities, getCommunity, getPosts } from '@/lib/api';
+import { findCommunity, loadCommunities, loadPosts } from '@/lib/api';
 import { boardPath, threadPath } from '@/lib/directories';
 import {
   absUrl,
@@ -16,7 +16,7 @@ const isoDate = (unixSec: number) => new Date(unixSec * 1000).toISOString();
 
 /** Static pages + one landing page per board (deduped: boards can share a directory code). */
 async function coreUrls() {
-  const communities = (await getCommunities(SITEMAP_TTL))?.communities ?? [];
+  const { communities } = await loadCommunities(SITEMAP_TTL);
   const boards = [...new Set(communities.map((c) => boardPath(c.address)))];
   return [{ loc: absUrl('/') }, { loc: absUrl('/search') }, ...boards.map((path) => ({ loc: absUrl(path) }))];
 }
@@ -32,11 +32,11 @@ async function communityUrls(address: string) {
   const urls: { loc: string; lastmod?: string }[] = [];
   const maxPages = Math.ceil(MAX_URLS_PER_COMMUNITY / SITEMAP_PAGE_LIMIT);
   for (let page = 1; page <= maxPages; page++) {
-    const res = await getPosts(
+    const res = await loadPosts(
       `?community=${encodeURIComponent(address)}&sort=new&limit=${SITEMAP_PAGE_LIMIT}&page=${page}`,
       SITEMAP_TTL,
     );
-    if (!res || res.posts.length === 0) break;
+    if (res.posts.length === 0) break;
     for (const p of res.posts) {
       urls.push({ loc: absUrl(threadPath(p)), lastmod: isoDate(p.timestamp) });
     }
@@ -51,6 +51,6 @@ export async function GET(_req: Request, { params }: Params): Promise<Response> 
 
   if (id === CORE_SITEMAP) return xmlResponse(urlsetXml(await coreUrls()));
 
-  if (!(await getCommunity(id))) return new Response('unknown sitemap', { status: 404 });
+  if (!(await findCommunity(id))) return new Response('unknown sitemap', { status: 404 });
   return xmlResponse(urlsetXml(await communityUrls(id)));
 }

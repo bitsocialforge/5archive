@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { boardPage, getCommunities, getCommunity } from './api';
+import { boardPage, findCommunity, getCommunities } from './api';
 import { adHocDirectory, archivedBoards, type Directory, directoryForAddress, getDirectory } from './directories';
 import type { Community } from './types';
 
@@ -39,7 +39,7 @@ export async function resolveBoard(segment: string, suffix = ''): Promise<BoardS
     permanentRedirect(`/${coded.code}${suffix}`);
   }
 
-  const community = await getCommunity(segment);
+  const community = await findCommunity(segment);
   if (!community) notFound();
   const adHoc = adHocDirectory(community);
   return { dir: adHoc, boards: adHoc.boards, segment: adHoc.code };

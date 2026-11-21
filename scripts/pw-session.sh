@@ -16,10 +16,13 @@ umask 077
 # slot on a machine with headroom).
 #
 # Liveness comes from `playwright-cli list --all`, which reports `status: open`
-# for a running browser. A lock whose recorded session is no longer open is
-# stale, and is reclaimed automatically rather than blocking every later
-# workflow. When playwright-cli cannot be queried the lock is left alone, so a
-# broken CLI never silently disables the budget.
+# for a running browser. A browser is only listed once it has finished
+# launching, so the lock also records the PID of the wrapper that is opening or
+# closing it, and stays held while that process runs. A lock whose browser is
+# not open and whose opener or closer is gone is stale, and is reclaimed
+# automatically rather than blocking every later workflow. When playwright-cli
+# cannot be queried the lock is left alone, so a broken CLI never silently
+# disables the budget.
 #
 # PW_SESSION_POLL_SECONDS overrides how often `--wait` re-checks the slot.
 
@@ -62,6 +65,12 @@ fi
 owner_file="$lock_dir/owner"
 started_file="$lock_dir/started-at"
 workspace_file="$lock_dir/workspace"
+pid_file="$lock_dir/pid"
+# A launch or close takes seconds (the Jev driver and perf runner allow 30-60s),
+# so a PID recorded longer ago than this no longer holds the slot. Otherwise a
+# pid file left by a killed wrapper whose PID the system later reuses would
+# keep a stale lock held forever.
+pid_grace_minutes=5
 default_wait_seconds=300
 poll_seconds="${PW_SESSION_POLL_SECONDS:-5}"
 
@@ -114,7 +123,30 @@ session_state() {
   echo dead
 }
 
+# Like session_state, for the lock as a whole. It echoes `busy` while the
+# wrapper that opens or closes the browser is still running (for up to
+# pid_grace_minutes after it recorded its PID), or when the lock was created
+# moments ago and does not name its owner yet: the browser is not listed during
+# either, but the slot is taken.
+lock_state() {
+  local owner="$1" pid=''
+
+  if [ -n "$(find "$pid_file" -mmin "-$pid_grace_minutes" 2>/dev/null)" ]; then
+    pid="$(sed -n '1p' "$pid_file" 2>/dev/null || true)"
+  fi
+  if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
+    echo busy
+  elif [ -n "$owner" ]; then
+    session_state "$owner"
+  elif [ -n "$(find "$lock_dir" -maxdepth 0 -mmin -1 2>/dev/null)" ]; then
+    echo busy
+  else
+    echo dead
+  fi
+}
+
 write_lock_metadata() {
+  printf '%s\n' "$$" >"$pid_file"
   printf '%s\n' "$1" >"$owner_file"
   date -u '+%Y-%m-%dT%H:%M:%SZ' >"$started_file"
   printf '%s\n' "$workspace" >"$workspace_file"
@@ -131,10 +163,10 @@ print_status() {
   owner="$(current_owner)"
   started="$(sed -n '1p' "$started_file" 2>/dev/null || true)"
   held_workspace="$(sed -n '1p' "$workspace_file" 2>/dev/null || true)"
-  state="$([ -n "$owner" ] && session_state "$owner" || echo unknown)"
+  state="$(lock_state "$owner")"
 
   case "$state" in
-    live) echo "pw-session: browser slot is held" ;;
+    live | busy) echo "pw-session: browser slot is held" ;;
     dead) echo "pw-session: browser slot is held by a stale lock" ;;
     *) echo "pw-session: browser slot is held (browser state unverifiable)" ;;
   esac
@@ -146,6 +178,7 @@ print_status() {
 
   case "$state" in
     live) echo "Browser: running" ;;
+    busy) echo "Browser: starting or stopping" ;;
     dead)
       echo "Browser: not running — the next 'open' reclaims this slot automatically"
       ;;
@@ -181,7 +214,7 @@ acquire() {
     fi
 
     owner="$(current_owner)"
-    state="$([ -n "$owner" ] && session_state "$owner" || echo dead)"
+    state="$(lock_state "$owner")"
 
     # Bounded so an unremovable lock directory fails loudly instead of spinning.
     if [ "$state" = dead ] && [ "$reclaims" -lt 3 ]; then
@@ -197,7 +230,7 @@ acquire() {
     fi
 
     if [ "$wait_seconds" -gt 0 ] && [ "$SECONDS" -lt "$wait_seconds" ]; then
-      echo "pw-session: slot held by '$owner'; retrying in ${poll_seconds}s (waited ${SECONDS}s of ${wait_seconds}s)" >&2
+      echo "pw-session: slot held by '${owner:-unknown}'; retrying in ${poll_seconds}s (waited ${SECONDS}s of ${wait_seconds}s)" >&2
       sleep "$poll_seconds"
       continue
     fi
@@ -230,7 +263,7 @@ release() {
     return 1
   fi
 
-  rm -f "$owner_file" "$started_file" "$workspace_file"
+  rm -f "$owner_file" "$started_file" "$workspace_file" "$pid_file"
   rmdir "$lock_dir"
   echo "pw-session: released browser slot for '$session'"
 }
@@ -276,11 +309,50 @@ case "$command" in
     fi
 
     acquire "$session" "$wait_seconds"
+
+    # A signal here (an execFile timeout, Ctrl-C) would otherwise kill only this
+    # wrapper and leave playwright-cli launching a browser after the caller's
+    # cleanup released the slot. Forward it, close whatever already started,
+    # then release. `launched` stays set from just before the launch until the
+    # traps are removed, so a signal that lands after a successful launch still
+    # closes the browser it is about to release the slot for.
+    opener=''
+    launched=''
+    cancel_open() {
+      trap '' INT TERM HUP
+      if [ -n "$opener" ]; then
+        kill -TERM "$opener" 2>/dev/null || true
+        wait "$opener" 2>/dev/null || true
+      fi
+      if [ -n "$launched" ]; then
+        "$playwright_cli" -s="$session" close >/dev/null 2>&1 || true
+      fi
+      if [ "$(current_owner)" = "$session" ]; then
+        release "$session" || true
+      fi
+      exit "$1"
+    }
+    trap 'cancel_open 129' HUP
+    trap 'cancel_open 130' INT
+    trap 'cancel_open 143' TERM
+
     # Guarded expansion: Bash 3.2 (macOS /bin/bash) errors on an empty array
-    # under `set -u`.
-    if ! "$playwright_cli" -s="$session" open ${open_args[@]+"${open_args[@]}"}; then
+    # under `set -u`. Run in the background so a trapped signal interrupts the
+    # wait instead of being deferred until the launch finishes.
+    launched=1
+    "$playwright_cli" -s="$session" open ${open_args[@]+"${open_args[@]}"} &
+    opener=$!
+    if ! wait "$opener"; then
+      opener=''
       release "$session"
       exit 1
+    fi
+    opener=''
+    trap - HUP INT TERM
+    # The browser is listed as open now, so this wrapper's PID no longer needs to
+    # hold the slot (and a reused PID cannot keep a stale lock alive).
+    if [ "$(current_owner)" = "$session" ]; then
+      rm -f "$pid_file"
     fi
     ;;
   close)
@@ -294,6 +366,11 @@ case "$command" in
     # Cleanup must always stop the browser, even when the lock was lost, so a
     # failed workflow cannot strand a running engine.
     owner="$(current_owner)"
+    # A closing browser is no longer listed as open. Mark the slot busy until
+    # the release below, so a concurrent `open` cannot take it in between.
+    if [ "$owner" = "$session" ]; then
+      { printf '%s\n' "$$" >"$pid_file"; } 2>/dev/null || true
+    fi
     close_status=0
     "$playwright_cli" -s="$session" close || close_status=$?
     if [ "$close_status" -ne 0 ]; then
